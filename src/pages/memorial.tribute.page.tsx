@@ -1,4 +1,14 @@
 import React, { useState } from 'react';
+import type { Message } from './types';
+
+interface MessageFormState {
+  name: string;
+  image: File | null;
+  imagePreview: string | null;
+  message: string;
+  date: string;
+}
+
 
 // Sample data for memorial profiles
 const memorialProfiles = [
@@ -98,12 +108,13 @@ const MemorialTributePage = () => {
   const [activeTab, setActiveTab] = useState('memorial');
   const [messages, setMessages] = useState(initialMessages);
   const [showMessageForm, setShowMessageForm] = useState(false);
-  const [expandedMessage, setExpandedMessage] = useState(null);
-  const [messageForm, setMessageForm] = useState({
+  const [expandedMessage, setExpandedMessage] = useState<number | null>(null);
+  const [messageForm, setMessageForm] = useState<MessageFormState>({
     name: '',
     image: null,
     imagePreview: '/api/placeholder/60/60',
-    message: ''
+    message: '',
+    date: new Date().toISOString().split('T')[0]
   });
 
   const tabs = [
@@ -113,41 +124,48 @@ const MemorialTributePage = () => {
     { id: 'videos', icon: '📹', label: 'Videos' }
   ];
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setMessageForm({
-          ...messageForm,
-          image: file,
-          imagePreview: e.target.result
-        });
-      };
-      reader.readAsDataURL(file);
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const result = event.target?.result;
+    if (typeof result === 'string') {
+      setMessageForm({
+        ...messageForm,
+        image: file,
+        imagePreview: result
+      });
     }
   };
+  reader.readAsDataURL(file);
+};
+
+
 
   const handleAddMessage = () => {
-    if (messageForm.name && messageForm.message) {
-      const newMessage = {
-        id: messages.length + 1,
-        name: messageForm.name,
-        image: messageForm.imagePreview,
-        message: messageForm.message
-      };
-      setMessages([...messages, newMessage]);
-      setMessageForm({ 
-        name: '', 
-        image: null, 
-        imagePreview: '/api/placeholder/60/60', 
-        message: '' 
-      });
-      setShowMessageForm(false);
-    }
-  };
+  if (messageForm.name && messageForm.message) {
+    const newMessage: Message = {
+      id: messages.length + 1,
+      name: messageForm.name,
+      image: messageForm.imagePreview || '/api/placeholder/60/60', // Provide fallback
+      message: messageForm.message,
+      date: messageForm.date
+    };
+    setMessages([...messages, newMessage]);
+    setMessageForm({ 
+      name: '', 
+      image: null, 
+      imagePreview: '/api/placeholder/60/60',
+      message: '',
+      date: new Date().toISOString().split('T')[0]
+    });
+    setShowMessageForm(false);
+  }
+};
 
-  const truncateMessage = (message, length = 60) => {
+  const truncateMessage = (message: string, length = 60) => {
     return message.length > length ? message.substring(0, length) + '...' : message;
   };
 
@@ -355,7 +373,7 @@ const MemorialTributePage = () => {
               <div className="image-upload-container">
                 <div className="current-image">
                   <img 
-                    src={messageForm.imagePreview} 
+                    src={messageForm.imagePreview || '/path/to/default/image.jpg'} 
                     alt="Profile preview"
                     className="preview-image"
                   />

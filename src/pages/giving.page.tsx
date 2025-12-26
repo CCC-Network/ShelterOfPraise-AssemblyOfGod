@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Heart, CreditCard, Smartphone, Building, Users, Target, Gift } from 'lucide-react';
 
 const GivingPage = () => {
-  const [selectedAmount, setSelectedAmount] = useState('');
+  const [selectedAmount, setSelectedAmount] = useState<number | string>('');
   const [customAmount, setCustomAmount] = useState('');
   const [selectedMethod, setSelectedMethod] = useState('');
 

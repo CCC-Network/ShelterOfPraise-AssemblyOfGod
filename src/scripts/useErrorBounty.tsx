@@ -2,7 +2,8 @@
 
 import { useCallback, useContext, useRef } from 'react';
 import { BugBountyManager } from './bug-bounty-manager';
-import { ErrorDetails, ErrorBountyContext } from './error-bounty.types';
+import type { ErrorDetails, ErrorBountyContext } from './error-bounty.types';
+import React from 'react';
 
 // Create context
 const BugBountyContext = React.createContext<BugBountyManager | null>(null);

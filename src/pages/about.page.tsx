@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { User, Users, BookOpen, BarChart3, Grid3X3, List, ChevronRight } from 'lucide-react';
+import { Users, BookOpen, BarChart3, Grid3X3, List, ChevronRight } from 'lucide-react'; // User
+// import { HierarchyLink, HierarchyNode } from 'd3-hierarchy';
 import * as d3 from 'd3';
 
 // Sample data arrays for reusability
@@ -323,20 +324,20 @@ const AboutUsPage = () => {
       // Create group for the entire tree
       const g = svg.append("g").attr("transform", "translate(50, 50)");
 
-      // Add links
-      const linkGenerator = d3.linkHorizontal<d3.HierarchyLink<OrgNode>, [number, number]>()
-        .x(d => d.y)
-        .y(d => d.x);
+      // Define the link generator
+// The first type is the Link object, the second is the data type of the source/target
+const linkGenerator = d3.linkHorizontal<any, d3.HierarchyPointNode<OrgNode>>()
+    .x(d => d.y) // In horizontal trees, we swap x and y
+    .y(d => d.x);
 
-      g.selectAll<SVGPathElement, d3.HierarchyLink<OrgNode>>(".link")
-        .data(root.links())
-        .enter()
-        .append("path")
-        .attr("class", "link")
-        .attr("d", linkGenerator)
-        .style("fill", "none")
-        .style("stroke", "#3b82f6")
-        .style("stroke-width", 2);
+// When drawing the paths in your SVG:
+svg.selectAll(".link")
+   .data(root.links())
+   .join("path")
+   .attr("class", "link")
+   .attr("d", (d) => linkGenerator({ source: d.source, target: d.target }) as string)
+   .attr("fill", "none")
+   .attr("stroke", "#ccc");
 
       // Add nodes
       const nodes = g.selectAll<SVGGElement, d3.HierarchyNode<OrgNode>>(".node")
