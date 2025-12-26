@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ChevronUp, Play, Music, Building, Video, BookOpen, Music2, FileText } from 'lucide-react';
 
 // Import thumbnails
