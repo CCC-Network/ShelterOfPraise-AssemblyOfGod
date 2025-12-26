@@ -1,13 +1,54 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="en" class="shelterofpraise" id="AssemblyOfGod">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
+    <meta name="description" content="Shelter of Praise Assembly of God in Lampanusan, Kalilangan, Bukidnon: worship services, ministries, and community outreach. Join us this Sunday!" />
+    <link rel="canonical" href="https://www.shelterofpraise.org/" /> <!-- Canonical URL | https://www.shelterofpraise.org -->
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+
+    <!-- Favicons -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/svg+xml" href="/src/assets/photos/icons/ag.png" />
+    <link rel="apple-touch-icon" href="/src/assets/photos/icons/ag.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Performance hints (optional) -->
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+
+  <!-- Open Graph (Facebook/LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Shelter of Praise Assembly of God" />
+    <meta property="og:title" content="About Our Church" />
+    <meta property="og:description" content="Learn about our history, leadership, and ministries in Lampanusan, Kalilangan, Bukidnon." />
+    <meta property="og:url" content="https://www.shelterofpraise.org/about" />
+    <meta property="og:image" content="https://www.shelterofpraise.org/og/cover-about.jpg" />
+    <meta property="og:locale" content="en_PH" />
+
+  <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="About Our Church" />
+    <meta name="twitter:description" content="Learn about our history, leadership, and ministries in Lampanusan, Kalilangan, Bukidnon." />
+    <meta name="twitter:image" content="https://www.shelterofpraise.org/og/cover-about.jpg" />
+
+  <!-- Optional: verification (replace with real tokens) -->
+    <meta name="google-site-verification" content="YOUR_TOKEN" />
+    <meta name="msvalidate.01" content="YOUR_TOKEN" />
+    <title>Shelter of Praise | Assembly of God</title>
+    <link rel="stylesheet" href="./src/styles/memorial.tribute.css">
+    <link rel="stylesheet" href="./src/styles/visit.us.css">
+    <link rel="stylesheet" href="./src/styles/giving.page.css">
+    <link rel="stylesheet" href="./src/styles/project.page.css">
+    <link rel="stylesheet" href="./src/styles/gallery.page.css">
+    <link rel="stylesheet" href="./src/styles/testimonial.page.css">
+    <link rel="stylesheet" href="./src/styles/blog.page.css">
+    <!-- Start cookieyes banner --> <script id="cookieyes" type="text/javascript" src="https://cdn-cookieyes.com/client_data/aedb613cac3f9030aa6bd53f/script.js"></script> <!-- End cookieyes banner -->
   </head>
   <body>
-    <div id="root"></div>
+    <div class="site-root" id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script type="module" src="fix-page-exports.js"></script>
+    <script type="module" src="src/utils/news.letter.system.ts"></script>
   </body>
 </html>

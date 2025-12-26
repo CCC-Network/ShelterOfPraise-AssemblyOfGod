@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
-    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo", // remove tsBuildInfoFile if incremental build is not needed
     "target": "ES2022",
+    "incremental": true, // Added object | Option 'tsBuildInfoFile' cannot be specified without specifying option 'incremental' or option 'composite'
     "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
@@ -26,9 +27,9 @@
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "erasableSyntaxOnly": true,
+    "erasableSyntaxOnly": true, // 🚫 removed erasableSyntaxOnly
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true // 🚫 removed noUncheckedSideEffectImports
   },
   "include": ["src"]
 }

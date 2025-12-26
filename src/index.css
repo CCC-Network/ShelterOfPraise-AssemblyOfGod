@@ -1,6 +1,12 @@
 @import "tailwindcss";
 
 :root {
+
+  /*Main Start*/
+  /*buttons root*/
+  --button-color-close: #292929;
+  /* Main End */
+
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -44,9 +50,10 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #1a1a1a00;
   cursor: pointer;
   transition: border-color 0.25s;
+  color: #000;
 }
 button:hover {
   border-color: #646cff;
@@ -68,3 +75,19 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+/* New Style Record*/
+#church-logo-text {
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-black);
+  line-height: 1.4;
+}
+#church-logo-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 20%;
+}
+
+/* Customs Style */
+

@@ -1,0 +1,17 @@
+.video-artist-txt {
+    color: var(--color-black-40) !important;
+}
+#project-categories-hdr, #related-content-hdr {
+    color: rgba(0, 0, 0, 0.795) !important;
+}
+.bg-cover-popup {
+    background: var(--bg-secondary) !important;
+}
+
+/* Buttons */
+
+/* Close buttons */
+.close-button {
+    background-color: var(--color-black-40) !important;
+    color: var(--color-white) !important;
+}

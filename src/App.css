@@ -40,3 +40,12 @@
 .read-the-docs {
   color: #888;
 }
+
+
+/* New Style Record*/
+#bg-cover-bg {
+  width: 100%;
+}
+#play-button-overlay-g {
+  background: #0000008c !important;
+}

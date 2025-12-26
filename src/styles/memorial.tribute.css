@@ -1,0 +1,752 @@
+.memorial-page {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #ffffff;
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 1rem;
+  }
+
+  .page-subtitle {
+    font-size: 1.1rem;
+    color: #666;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .memorial-layout {
+    display: grid;
+    grid-template-columns: 100px 1fr 120px;
+    gap: 0;
+    background: #f8f9fa;
+    border-radius: 20px;
+    overflow: hidden;
+    min-height: 600px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Left Profile Sidebar */
+  .profile-sidebar {
+    background: #ffffff;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    border-right: 1px solid #e9ecef;
+  }
+
+  .profile-item {
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+
+  .profile-item:hover {
+    transform: scale(1.05);
+  }
+
+  .profile-avatar-container {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid transparent;
+    transition: border-color 0.3s ease;
+  }
+
+  .profile-item.active .profile-avatar-container {
+    border-color: #007bff;
+  }
+
+  .profile-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .profile-tooltip {
+    position: absolute;
+    left: 85px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #333;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 10;
+  }
+
+  .profile-item:hover .profile-tooltip {
+    opacity: 1;
+  }
+
+  /* Center Memorial Content */
+  .memorial-center {
+    background: #f5f5f5;
+    padding: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .memorial-card-content {
+    background: white;
+    border-radius: 20px;
+    padding: 2.5rem;
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+
+  .memorial-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .dove-icon {
+    font-size: 1.5rem;
+  }
+
+  .in-memory-text {
+    font-size: 1rem;
+    color: #666;
+    font-style: italic;
+    margin: 0;
+  }
+
+  .memorial-body {
+    position: relative;
+    margin-bottom: 2rem;
+  }
+
+  .floral-decorations {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    z-index: 1;
+  }
+
+  .floral-left, .floral-right {
+    font-size: 2rem;
+    opacity: 0.6;
+  }
+
+  .memorial-photo-container {
+    margin: 2rem 0;
+    display: flex;
+    justify-content: center;
+  }
+
+  .memorial-photo {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid white;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .memorial-info {
+    margin-bottom: 2rem;
+  }
+
+  .memorial-name {
+    font-family: 'Brush Script MT', cursive;
+    font-size: 3rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+    line-height: 1;
+  }
+
+  .memorial-dates {
+    font-size: 1.25rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+  }
+
+  .memorial-role {
+    font-size: 1rem;
+    color: #666;
+    font-style: italic;
+    margin: 0;
+  }
+
+  .quote-section {
+    margin-top: 1.5rem;
+  }
+
+  .quote-box {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 12px;
+    border-left: 4px solid #007bff;
+    text-align: left;
+  }
+
+  .quote-text {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #555;
+    font-style: italic;
+    margin: 0;
+  }
+
+  .memorial-footer {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+  }
+
+  .angel-decoration {
+    font-size: 1.5rem;
+    opacity: 0.4;
+  }
+
+  /* Stories Content */
+  .stories-content {
+    display: flex;
+    gap: 2rem;
+    height: 100%;
+    align-items: center;
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .story-image-container {
+    flex: 1;
+  }
+
+  .story-image {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+
+  .story-text {
+    flex: 1;
+  }
+
+  .story-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 1rem;
+  }
+
+  .story-content {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #555;
+  }
+
+  /* Photos Grid */
+  .photos-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    padding: 2rem;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .photo-image {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+  }
+
+  .photo-image:hover {
+    transform: scale(1.05);
+  }
+
+  /* Videos Grid */
+  .videos-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    padding: 2rem;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  }
+
+  .video-item {
+    text-align: center;
+  }
+
+  .video-thumbnail {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 0.75rem;
+  }
+
+  .video-image {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+  }
+
+  .play-button {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+  }
+
+  .video-title {
+    font-size: 0.875rem;
+    color: #666;
+    margin: 0;
+  }
+
+  /* Right Tabs Sidebar */
+  .tabs-sidebar {
+    background: #ffffff;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    border-left: 1px solid #e9ecef;
+  }
+
+  .tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    padding: 1rem 0.75rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    position: relative;
+    min-width: 80px;
+  }
+
+  .tab-item:hover,
+  .tab-item.active {
+    background: #33333300;
+    color: rgb(0, 0, 0);
+    transform: translateX(-5px);
+  }
+
+  .tab-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .tab-icon span {
+    font-size: 1.25rem;
+  }
+
+  .tab-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-align: center;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .tab-item:hover .tab-label {
+    opacity: 1;
+  }
+
+  /* Message Wall Section */
+  .message-wall-section {
+    margin-top: 4rem;
+  }
+
+  .message-wall-header {
+    margin-bottom: 2rem;
+  }
+
+  .section-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #333;
+    margin: 0;
+  }
+
+  .message-cards-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .message-card {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+  }
+
+  .message-card:hover {
+    transform: translateY(-3px);
+  }
+
+  .message-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .message-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .message-author {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+  }
+
+  .message-text {
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.6;
+    cursor: pointer;
+    margin: 0;
+  }
+
+  /* Floating Message Button */
+  .floating-message-button {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: #333;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 50px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 1rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    z-index: 1000;
+  }
+
+  .floating-message-button:hover {
+    background: #000;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    padding: 1rem;
+  }
+
+  .modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+    font-size: 0.95rem;
+  }
+
+  .image-upload-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .current-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #e9ecef;
+  }
+
+  .preview-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .upload-button {
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: #666;
+    transition: all 0.3s ease;
+  }
+
+  .upload-button:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+  }
+
+  .form-input,
+  .form-textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+  }
+
+  .form-input:focus,
+  .form-textarea:focus {
+    outline: none;
+    border-color: #007bff;
+  }
+
+  .form-textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  .modal-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+  }
+
+  .submit-button {
+    background: #333;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s ease;
+  }
+
+  .submit-button:hover {
+    background: #000;
+  }
+
+  .cancel-button {
+    background: #f8f9fa;
+    color: #666;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+  }
+
+  .cancel-button:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 1rem;
+    }
+
+    .page-title {
+      font-size: 2rem;
+    }
+
+    .memorial-layout {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      padding: 1rem;
+    }
+
+    .profile-sidebar {
+      flex-direction: row;
+      overflow-x: auto;
+      padding: 1rem;
+      gap: 1rem;
+      border-right: none;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .profile-avatar-container {
+      width: 60px;
+      height: 60px;
+    }
+
+    .tabs-sidebar {
+      flex-direction: row;
+      justify-content: center;
+      padding: 1rem;
+      border-left: none;
+      border-top: 1px solid #e9ecef;
+    }
+
+    .memorial-center {
+      padding: 1.5rem;
+    }
+
+    .memorial-card-content {
+      padding: 1.5rem;
+    }
+
+    .memorial-name {
+      font-size: 2.5rem;
+    }
+
+    .stories-content {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .photos-grid {
+      grid-template-columns: repeat(2, 1fr);
+      padding: 1rem;
+    }
+
+    .videos-grid {
+      grid-template-columns: 1fr;
+      padding: 1rem;
+    }
+
+    .message-cards-container {
+      grid-template-columns: 1fr;
+    }
+
+    .floating-message-button {
+      bottom: 1rem;
+      right: 1rem;
+      padding: 0.875rem 1.25rem;
+      font-size: 0.9rem;
+    }
+
+    .modal-content {
+      padding: 1.5rem;
+      margin: 1rem;
+    }
+
+    .modal-buttons {
+      flex-direction: column-reverse;
+    }
+
+    .submit-button,
+    .cancel-button {
+      width: 100%;
+      padding: 1rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .memorial-photo {
+      width: 120px;
+      height: 120px;
+    }
+
+    .memorial-name {
+      font-size: 2rem;
+    }
+
+    .quote-box {
+      padding: 1rem;
+    }
+
+    .image-upload-container {
+      flex-direction: column;
+      text-align: center;
+      gap: 0.75rem;
+    }
+
+    .current-image {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto;
+    }
+  }
