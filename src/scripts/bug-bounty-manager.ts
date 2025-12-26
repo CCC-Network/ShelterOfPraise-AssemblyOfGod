@@ -1,11 +1,11 @@
 // bug-bounty-manager.ts
 
 import { 
-    BugBountyReport, 
+    type BugBountyReport, 
     ErrorSeverity, 
     ErrorCategory, 
-    ErrorBountyContext,
-    ErrorDetails 
+    type ErrorBountyContext,
+    type ErrorDetails 
   } from './error-bounty.types';
   import { ErrorDetector } from './error-detector';
   
@@ -128,20 +128,25 @@ import {
       return steps;
     }
   
-    private determineExpectedBehavior(category: ErrorCategory): string {
-      const behaviors = {
-        [ErrorCategory.SECURITY]: 'System should maintain security integrity and prevent unauthorized access',
-        [ErrorCategory.PERFORMANCE]: 'System should perform optimally within acceptable response times',
-        [ErrorCategory.FUNCTIONAL]: 'Feature should work as designed and documented',
-        [ErrorCategory.DATA_INTEGRITY]: 'Data should remain consistent, accurate, and preserved',
-        [ErrorCategory.AUTHENTICATION]: 'Users should be properly authenticated and authorized',
-        [ErrorCategory.PAYMENT]: 'Payment processing should be secure and reliable'
-      };
+   private determineExpectedBehavior(category: ErrorCategory): string {
+  const behaviors: Record<ErrorCategory, string> = {
+    [ErrorCategory.SECURITY]: 'System should maintain security integrity and prevent unauthorized access',
+    [ErrorCategory.PERFORMANCE]: 'System should perform optimally within acceptable response times',
+    [ErrorCategory.FUNCTIONAL]: 'Feature should work as designed and documented',
+    [ErrorCategory.DATA_INTEGRITY]: 'Data should remain consistent, accurate, and preserved',
+    [ErrorCategory.UI_UX]: 'User interface should be intuitive and responsive',
+    [ErrorCategory.NETWORK]: 'Network operations should complete successfully',
+    [ErrorCategory.AUTHENTICATION]: 'Users should be properly authenticated and authorized',
+    [ErrorCategory.AUTHORIZATION]: 'Users should only access authorized resources',
+    [ErrorCategory.PAYMENT]: 'Payment processing should be secure and reliable',
+    [ErrorCategory.THIRD_PARTY]: 'Third-party integrations should function as expected',
+    [ErrorCategory.SYSTEM]: 'System components should operate correctly'
+  };
+
+  return behaviors[category];
+}
   
-      return behaviors[category] || 'System should behave as expected without errors';
-    }
-  
-    private assessImpact(severity: ErrorSeverity, category: ErrorCategory): string {
+    private assessImpact(severity: ErrorSeverity, _category: ErrorCategory): string {
       if (severity === ErrorSeverity.CRITICAL) {
         return 'System outage, data loss, or security breach affecting all users';
       } else if (severity === ErrorSeverity.HIGH) {

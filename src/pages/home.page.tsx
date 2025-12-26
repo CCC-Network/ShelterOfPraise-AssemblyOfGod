@@ -12,7 +12,7 @@ const HomePage = () => {
   });
 
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const observerRef = useRef(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
   // Sample video data
   const videos = [
@@ -47,12 +47,14 @@ const HomePage = () => {
 
   // Intersection Observer for scroll animations
   useEffect(() => {
-    observerRef.current = new IntersectionObserver(
+    const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const targetId = entry.target.getAttribute('data-section');
-            setIsVisible(prev => ({ ...prev, [targetId]: true }));
+            if (targetId) {
+              setIsVisible(prev => ({ ...prev, [targetId]: true }));
+            }
           }
         });
       },
@@ -61,15 +63,13 @@ const HomePage = () => {
 
     const sections = document.querySelectorAll('[data-section]');
     sections.forEach(section => {
-      if (observerRef.current) {
-        observerRef.current.observe(section);
-      }
+      observer.observe(section);
     });
 
+    observerRef.current = observer;
+
     return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
+      observer.disconnect();
     };
   }, []);
 
@@ -485,7 +485,7 @@ const HomePage = () => {
               ▶️
             </button>
             */}
-            <div className="bg-white/25 rounded-full p-6 group-hover:scale-110 transition-transform duration-300"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play text-black ml-1" aria-hidden="true"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path></svg></div>
+            <div className="bg-white/25 rounded-full p-6 group-hover:scale-110 transition-transform duration-300"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-play text-black ml-1" aria-hidden="true"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path></svg></div>
             <h3 style={{
               fontSize: 'var(--font-size-h3)',
               fontWeight: 'var(--font-weight-medium)',

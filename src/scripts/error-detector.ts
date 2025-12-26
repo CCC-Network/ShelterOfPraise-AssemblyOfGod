@@ -1,6 +1,6 @@
 // error-detector.ts
 
-import { ErrorSeverity, ErrorCategory, ErrorDetails, BugBountyReport } from './error-bounty.types';
+import { ErrorSeverity, ErrorCategory, type ErrorDetails } from './error-bounty.types';
 
 export class ErrorDetector {
   private static readonly SECURITY_PATTERNS = [
@@ -32,7 +32,7 @@ export class ErrorDetector {
     /inconsistent.*data/i
   ];
 
-  public static classifyError(error: Error, details: ErrorDetails): { severity: ErrorSeverity; category: ErrorCategory } {
+  public static classifyError(error: Error, _details: ErrorDetails): { severity: ErrorSeverity; category: ErrorCategory } {
     const message = error.message.toLowerCase();
     const stack = error.stack?.toLowerCase() || '';
 
@@ -82,11 +82,11 @@ export class ErrorDetector {
     );
   }
 
-  private static isAuthIssue(message: string, stack: string): boolean {
+  private static isAuthIssue(message: string, _stack: string): boolean {
     return /unauthorized|authentication.*failed|jwt.*expired|token.*invalid/i.test(message);
   }
 
-  private static isPaymentIssue(message: string, stack: string): boolean {
+  private static isPaymentIssue(message: string, _stack: string): boolean {
     return /payment.*failed|transaction.*declined|credit.*card|stripe|paypal/i.test(message);
   }
 
@@ -96,27 +96,29 @@ export class ErrorDetector {
     );
   }
 
-  private static isNetworkIssue(message: string, stack: string): boolean {
+  private static isNetworkIssue(message: string, _stack: string): boolean {
     return /network.*error|failed.*fetch|axios.*error|CORS/i.test(message);
   }
 
-  public static calculatePriority(severity: ErrorSeverity, frequency: string): number {
-    const severityWeights = {
-      [ErrorSeverity.CRITICAL]: 100,
-      [ErrorSeverity.HIGH]: 80,
-      [ErrorSeverity.MEDIUM]: 60,
-      [ErrorSeverity.LOW]: 40,
-      [ErrorSeverity.INFO]: 20
-    };
+  public static calculatePriority(
+  severity: ErrorSeverity, 
+  frequency: 'once' | 'rare' | 'occasional' | 'frequent' | 'constant'
+): number {
+  const severityWeights: Record<ErrorSeverity, number> = {
+    [ErrorSeverity.CRITICAL]: 100,
+    [ErrorSeverity.HIGH]: 80,
+    [ErrorSeverity.MEDIUM]: 60,
+    [ErrorSeverity.LOW]: 40,
+    [ErrorSeverity.INFO]: 20
+  };
 
-    const frequencyWeights = {
-      'constant': 1.0,
-      'frequent': 0.8,
-      'occasional': 0.6,
-      'rare': 0.4,
-      'once': 0.2
-    };
+  const frequencyWeights = {
+    'constant': 1.0,
+    'frequent': 0.8,
+    'occasional': 0.6,
+    'rare': 0.4,
+    'once': 0.2
+  } as const;
 
-    return severityWeights[severity] * frequencyWeights[frequency];
-  }
-}
+  return severityWeights[severity] * frequencyWeights[frequency];
+}}

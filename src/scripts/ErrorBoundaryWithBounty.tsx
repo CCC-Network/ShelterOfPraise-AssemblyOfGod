@@ -1,6 +1,5 @@
 // ErrorBoundaryWithBounty.tsx
 import React from 'react';
-import { useErrorBounty } from './useErrorBounty';
 
 class ErrorBoundaryWithBounty extends React.Component<
   { children: React.ReactNode; componentName: string },
@@ -15,7 +14,7 @@ class ErrorBoundaryWithBounty extends React.Component<
     // In real implementation, you might want to use HOC or different pattern
   }
 
-  static getDerivedStateFromError(error: Error) {
+  static getDerivedStateFromError(_error: Error) {
     return { hasError: true };
   }
 

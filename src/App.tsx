@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Link, Route, useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown, MapPin, Phone, Mail } from 'lucide-react';
 
 import { setupNewsletter } from "./utils/news.letter.system";
