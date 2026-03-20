@@ -12,7 +12,6 @@ import {
   Book,
   Shirt,
   Star,
-  Check,
 } from "lucide-react";
 
 /* ─────────────────────────────────────────────

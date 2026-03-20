@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronUp, Play, Music, Building, Video, BookOpen, Music2, FileText } from 'lucide-react';
+import { Play, Music, Building, Video, BookOpen, Music2, FileText } from 'lucide-react';
 
 // Import thumbnails
 import thumbnailAlay from '../assets/photos/thumbnail-alay.png';
