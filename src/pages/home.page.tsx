@@ -157,11 +157,11 @@ const HomePage = () => {
           playsinline: 1,
         },
         events: {
-          onReady: (e) => {
+          onReady: (e: { target: any; }) => {
             if (!mounted || !autoRef.current) return;
             startPreview(0, e.target);
           },
-          onStateChange: (e) => {
+          onStateChange: (e: { data: any; }) => {
             if (e.data === window.YT.PlayerState.PLAYING) setIsPlaying(true);
             if (e.data === window.YT.PlayerState.PAUSED)  setIsPlaying(false);
           },

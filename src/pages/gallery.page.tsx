@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  ChevronLeft, ChevronRight, X, Search,
+  Search,
   Grid2x2, List, Columns3, Square, LayoutGrid,
   Folder, FolderOpen, FileImage, Clock, ChevronDown,
   Images

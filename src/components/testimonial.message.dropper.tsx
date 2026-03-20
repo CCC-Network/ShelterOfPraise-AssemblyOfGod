@@ -1,7 +1,7 @@
 // src/pages/testimonials/components/testimonial.message.dropper.tsx
 import { useState } from "react";
 import { X, MessageCircle, Upload, Link as LinkIcon, Loader2 } from "lucide-react";
-import { submitTestimonial } from "../testimonials.data";
+import { submitTestimonial } from "../utils/testimonials.data";
 
 type SubmitStatus = "idle" | "sending" | "success" | "error";
 
