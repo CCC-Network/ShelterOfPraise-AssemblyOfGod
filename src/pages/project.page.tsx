@@ -5,6 +5,10 @@ import { ChevronUp, Play, Music, Building, Video, BookOpen, Music2, FileText } f
 import thumbnailAlay from '../assets/photos/thumbnail-alay.png';
 import thumbnailAlab from '../assets/photos/thumbnail-alab.jpg';
 
+// Import page styles
+import '../styles/project.page.css';
+
+/* ─── Types ─────────────────────────────────────────── */
 type PopupType = 'description' | 'lyrics' | 'story' | null;
 type SectionType = 'description' | 'lyrics' | 'story';
 
@@ -20,78 +24,30 @@ interface HighlightVideo {
   isNew?: boolean;
 }
 
-const ProjectsPage = () => {
-  const [activeTab, setActiveTab] = useState('music-videos');
-  const [activePopup, setActivePopup] = useState<PopupType>(null);
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
-  const [videoOverlayStates, setVideoOverlayStates] = useState<{ [key: number]: boolean }>({});
+interface SidebarVideo {
+  id: number;
+  title: string;
+  description: string;
+  type: string;
+}
 
-  const togglePopup = (popup: SectionType) => {
-    setActivePopup(activePopup === popup ? null : popup);
-  };
+/* ─── Data ───────────────────────────────────────────── */
+const tabs = [
+  { id: 'music-videos',    label: 'Music Videos',       icon: Music    },
+  { id: 'church-projects', label: 'Church Projects',    icon: Building },
+  { id: 'behind-scenes',   label: 'Behind the Scenes',  icon: Video    },
+];
 
-  const closePopup = () => {
-    setActivePopup(null);
-  };
-
-  const handleVideoOverlayClick = (videoId: number) => {
-    setVideoOverlayStates(prev => ({
-      ...prev,
-      [videoId]: false
-    }));
-  };
-
-  const handleVideoSelect = (index: number) => {
-    setCurrentVideoIndex(index);
-    setActivePopup(null);
-  };
-
-  const tabs = [
-    { id: 'music-videos', label: 'Music Videos', icon: Music },
-    { id: 'church-projects', label: 'Church Projects', icon: Building },
-    { id: 'behind-scenes', label: 'Behind the Scenes', icon: Video }
-  ];
-
-  const sidebarVideos = [
-    {
-      id: 1,
-      title: "Behind the Scenes: 뛰어(JUMP) Recording",
-      description: "Go behind the scenes of our latest worship song recording session. See how our team worked together to create this powerful anthem of faith and hope.",
-      thumbnail: "/api/placeholder/120/80",
-      type: "behind-scenes"
-    },
-    {
-      id: 2,
-      title: "Church Extension Project Update",
-      description: "Latest updates on our sanctuary expansion project. See the progress we've made and what's coming next in our building journey.",
-      thumbnail: "/api/placeholder/120/80",
-      type: "project"
-    },
-    {
-      id: 3,
-      title: "Worship Team Practice Sessions",
-      description: "Join our worship team during their practice sessions as they prepare for Sunday service and special events.",
-      thumbnail: "/api/placeholder/120/80",
-      type: "behind-scenes"
-    },
-    {
-      id: 4,
-      title: "Community Outreach Program",
-      description: "Highlights from our recent community outreach initiatives and how we're serving our local neighborhood.",
-      thumbnail: "/api/placeholder/120/80",
-      type: "project"
-    }
-  ];
-
-  const highlightVideos: HighlightVideo[] = [
-    {
-      id: 1,
-      title: "ALAY - Official Music Video",
-      artist: "JHERICO BALASA",
-      youtubeId: "oJVMKmauUSI",
-      thumbnail: thumbnailAlay,
-      description: "From the first strum, to the late-night edits, to the tears behind the lyrics—this song has been a journey of pain, healing, and worship. This isn't just a song… it's a prayer. It's a tribute to the brothers we lost. And above all, it's an offering to the One who deserves it all. 🙌",
-      lyrics: `[VERSE 1]
+const highlightVideos: HighlightVideo[] = [
+  {
+    id: 1,
+    title: 'ALAY - Official Music Video',
+    artist: 'JHERICO BALASA',
+    youtubeId: 'oJVMKmauUSI',
+    thumbnail: thumbnailAlay,
+    description:
+      "From the first strum, to the late-night edits, to the tears behind the lyrics—this song has been a journey of pain, healing, and worship. This isn't just a song… it's a prayer. It's a tribute to the brothers we lost. And above all, it's an offering to the One who deserves it all. 🙌",
+    lyrics: `[VERSE 1]
 
 Ikaw ang pahinga
 Sa presensya mo Hesus
@@ -137,17 +93,19 @@ Ang Alab ikaw ang tanging alab- back
 Ang Alab ikaw ang tanging alab- chin
 Ang Alab ikaw ang tanging alab- nikko
 Ang alab ikaw- front`,
-      story: "This song was born during our youth retreat when we were discussing how faith sometimes requires us to 'jump' beyond our comfort zones. The contemporary sound reflects our desire to reach younger generations while maintaining the core message of trust in God. The recording process brought our entire worship team together, creating not just a song, but a testimony of our collective faith journey.",
-      isNew: false
-    },
-    {
-      id: 2,
-      title: "ALAB - Official Music Video",
-      artist: "JHERICO BALASA",
-      youtubeId: "6f3yne-cvgg",
-      thumbnail: thumbnailAlab,
-      description: "A powerful worship anthem that ignites the fire of faith within us. ALAB represents the burning passion we have for worship and our commitment to serving God with all our hearts.",
-      lyrics: `Ang yong pangalan
+    story:
+      'This song was born during our youth retreat when we were discussing how faith sometimes requires us to "jump" beyond our comfort zones. The contemporary sound reflects our desire to reach younger generations while maintaining the core message of trust in God. The recording process brought our entire worship team together, creating not just a song, but a testimony of our collective faith journey.',
+    isNew: false,
+  },
+  {
+    id: 2,
+    title: 'ALAB - Official Music Video',
+    artist: 'JHERICO BALASA',
+    youtubeId: '6f3yne-cvgg',
+    thumbnail: thumbnailAlab,
+    description:
+      'A powerful worship anthem that ignites the fire of faith within us. ALAB represents the burning passion we have for worship and our commitment to serving God with all our hearts.',
+    lyrics: `Ang yong pangalan
 saki'y nananahan
 Di kakalimutan
 kabutihan mong walang hanggan
@@ -184,341 +142,291 @@ Init sa lamig ang yakap mo
 
 di batid ang lawak, di batid ang lalim
 ng pag ibig mo`,
-      story: "ALAB was written during a season of spiritual revival in our church. The word 'alab' means 'flame' in Filipino, representing the fire of the Holy Spirit that burns within every believer. This song became an anthem for our youth ministry and has been sung in churches across the Philippines.",
-      isNew: true
-    }
-  ];
+    story:
+      "ALAB was written during a season of spiritual revival in our church. The word 'alab' means 'flame' in Filipino, representing the fire of the Holy Spirit that burns within every believer. This song became an anthem for our youth ministry and has been sung in churches across the Philippines.",
+    isNew: true,
+  },
+];
+
+const sidebarVideos: SidebarVideo[] = [
+  {
+    id: 1,
+    title: 'Behind the Scenes: 뛰어(JUMP) Recording',
+    description:
+      'Go behind the scenes of our latest worship song recording session.',
+    type: 'behind-scenes',
+  },
+  {
+    id: 2,
+    title: 'Church Extension Project Update',
+    description:
+      'Latest updates on our sanctuary expansion project and whats coming next.',
+    type: 'project',
+  },
+  {
+    id: 3,
+    title: 'Worship Team Practice Sessions',
+    description:
+      'Join our worship team during their practice sessions for Sunday service.',
+    type: 'behind-scenes',
+  },
+  {
+    id: 4,
+    title: 'Community Outreach Program',
+    description:
+      'Highlights from our recent community outreach initiatives.',
+    type: 'project',
+  },
+];
+
+/* ─── Sub-components ─────────────────────────────────── */
+
+/** Thumbnail card in the playlist strip */
+const PlaylistCard = ({
+  video,
+  isActive,
+  onClick,
+}: {
+  video: HighlightVideo;
+  isActive: boolean;
+  onClick: () => void;
+}) => (
+  <div
+    className={`playlist-card${isActive ? ' active' : ''}`}
+    onClick={onClick}
+  >
+    <div className="playlist-thumb">
+      <img src={video.thumbnail} alt={video.title} loading="lazy" />
+      <div className="playlist-thumb-dim">
+        <Play size={14} color="#fff" />
+      </div>
+      {video.isNew && <span className="playlist-badge">NEW MV</span>}
+    </div>
+    <p className="playlist-title">{video.title}</p>
+    <p className="video-artist-txt">{video.artist}</p>
+  </div>
+);
+
+/* ─── Main Page ──────────────────────────────────────── */
+const ProjectsPage = () => {
+  const [activeTab, setActiveTab]               = useState('music-videos');
+  const [activePopup, setActivePopup]           = useState<PopupType>(null);
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+  const [overlayVisible, setOverlayVisible]     = useState<Record<number, boolean>>({});
 
   const currentVideo = highlightVideos[currentVideoIndex];
-  const showOverlay = videoOverlayStates[currentVideo.id] !== false;
+  const showOverlay  = overlayVisible[currentVideo.id] !== false;
 
-  // Video Card Component
-  const VideoCard = ({ video, isActive, onClick }: { video: HighlightVideo, isActive: boolean, onClick: () => void }) => (
-    <div 
-      className={`p-3 shadow-lg rounded-lg transition-all duration-200 cursor-pointer ${isActive ? 'bg-black text-white' : 'hover:bg-gray-80'}`}
-      style={{
-        background: isActive ? 'var(--bg-main-box)' : 'transparent',
-        color: isActive ? 'var(--color-white)' : 'var(--color-black)',
-      }}
-      onClick={onClick}
-    >
-      <div className="w-full h-20 rounded mb-2 flex items-center justify-center relative overflow-hidden">
-        <img 
-          src={video.thumbnail} 
-          alt={video.title}
-          loading="lazy" 
-          className="w-full h-full object-cover rounded"
-        />
-        <div className="absolute inset-0 bg-black/30 flex items-center justify-center">   
-          <Play size={16} className="text-white" />
-        </div>
-        {video.isNew && (
-          <div className="absolute top-1 right-1 bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold">
-            NEW MV
-          </div>
-        )}
-      </div>
-      <div>
-        <h4 className="custom-span font-medium line-clamp-2 mb-1 text-xs leading-tight">
-          {video.title}
-        </h4>
-        <p 
-          className="video-artist-txt line-clamp-1 text-xs"
-          style={{ color: isActive ? 'var(--color-purple-60)' : 'var(--color-black-60)' }}
-        >
-          {video.artist}
+  const togglePopup = (section: SectionType) =>
+    setActivePopup(prev => (prev === section ? null : section));
+
+  const closePopup = () => setActivePopup(null);
+
+  const handlePlay = (id: number) =>
+    setOverlayVisible(prev => ({ ...prev, [id]: false }));
+
+  const handleVideoSelect = (index: number) => {
+    setCurrentVideoIndex(index);
+    setActivePopup(null);
+  };
+
+  /* ─ render ─ */
+  return (
+    <div className="projects-page">
+
+      {/* ── Page Header ── */}
+      <div className="projects-header">
+        <h1 className="custom-h1">Projects</h1>
+        <p className="custom-p" style={{ color: 'var(--color-black-60)', marginTop: '0.25rem' }}>
+          <em>Worship Team | Music Publishing</em>
+        </p>
+        <p className="custom-span" style={{ marginTop: '0.5rem' }}>
+          Original music, videos, lyrics, behind the song stories
         </p>
       </div>
-    </div>
-  );
 
-  return (
-    <div className="min-h-screen" style={{ background: 'var(--bg-main)' }}>
-      {/* Header */}
-      <div className="border-b" style={{ borderColor: 'var(--color-black-20)' }}>
-        <div className="container mx-auto px-4 py-8">
-          <h1 className="custom-h1 text-center mb-4">Projects</h1>
-          <p className="custom-p text-center" style={{ color: 'var(--color-black-60)' }}>
-            <em>Worship Team | Music Publishing</em>
-          </p>
-          <p className="custom-span text-center mt-2">
-            Original music, videos, lyrics, behind the song stories
-          </p>
-        </div>
+      {/* ── Tab Bar ── */}
+      <div className="projects-tab-bar">
+        {tabs.map(({ id, label, icon: Icon }) => (
+          <button
+            key={id}
+            className={`projects-tab-btn${activeTab === id ? ' active' : ''}`}
+            onClick={() => setActiveTab(id)}
+          >
+            <Icon size={16} />
+            {label}
+          </button>
+        ))}
       </div>
 
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Sidebar - Navigation */}
-          <div className="lg:col-span-2">
-            <div className="custom-box sticky top-6">
-              <h3 id="project-categories-hdr" className="custom-h4 mb-4">Project Categories</h3>
-              <nav className="space-y-2">
-                {tabs.map((tab) => {
-                  const IconComponent = tab.icon;
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
-                        activeTab === tab.id
-                          ? 'bg-black text-white shadow-md'
-                          : 'hover:bg-gray-100'
-                      }`}
-                      style={{
-                        background: activeTab === tab.id ? 'var(--bg-main-box)' : 'transparent',
-                        color: activeTab === tab.id ? 'var(--color-white)' : 'var(--color-black)'
-                      }}
-                    >
-                      <IconComponent size={18} />
-                      <span className="custom-span font-medium">{tab.label}</span>
-                    </button>
-                  );
-                })}
-              </nav>
+      {/* ── Body ── */}
+      <div className="projects-body">
 
-              {/* Music Videos List */}
-              {activeTab === 'music-videos' && (
-                <div className="mt-6">
-                  <h4 className="custom-h4 mb-3">Music Videos</h4>
-                  <div className="space-y-2">
-                    {highlightVideos.map((video, index) => (
-                      <VideoCard
-                        key={video.id}
-                        video={video}
-                        isActive={currentVideoIndex === index}
-                        onClick={() => handleVideoSelect(index)}
-                      />
-                    ))}
-                  </div>
+        {/* ── Main Column ── */}
+        <div className="projects-main">
+
+          {/* Music Videos tab content */}
+          {activeTab === 'music-videos' && (
+            <>
+              {/* Video Stage */}
+              <div className="video-stage custom-box">
+                <div className="video-stage-player">
+                  <iframe
+                    key={currentVideo.youtubeId}
+                    src={`https://www.youtube.com/embed/${currentVideo.youtubeId}?enablejsapi=1`}
+                    title={currentVideo.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                  />
+
+                  {currentVideo.isNew && !showOverlay && (
+                    <span className="new-mv-badge">NEW MV</span>
+                  )}
+
+                  {showOverlay && (
+                    <div className="video-overlay" onClick={() => handlePlay(currentVideo.id)}>
+                      <img src={currentVideo.thumbnail} alt={currentVideo.title} loading="lazy" />
+                      {currentVideo.isNew && <span className="new-mv-badge">NEW MV</span>}
+                      <div className="video-overlay-dim">
+                        <div id="play-container-toggle" className="video-play-btn">
+                          <Play size={44} color="#fff" style={{ marginLeft: 3 }} />
+                        </div>
+                      </div>
+                      <div className="video-title-overlay">
+                        <div className="video-title-overlay-inner">
+                          <h3>{currentVideo.title}</h3>
+                          <p>{currentVideo.artist}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
+
+                {/* Video meta */}
+                <div className="video-meta">
+                  <h2 className="custom-h2">{currentVideo.title}</h2>
+                  <p className="custom-span" style={{ color: 'var(--color-black-60)' }}>
+                    {currentVideo.artist}
+                  </p>
+                  {currentVideo.isNew && (
+                    <span className="new-release-badge">NEW RELEASE</span>
+                  )}
+                </div>
+
+                {/* Action buttons */}
+                <div className="video-action-btns">
+                  {(
+                    [
+                      { key: 'description', label: 'Description', Icon: FileText },
+                      { key: 'lyrics',      label: 'Lyrics',      Icon: Music2  },
+                      { key: 'story',       label: 'Story',       Icon: BookOpen },
+                    ] as const
+                  ).map(({ key, label, Icon }) => (
+                    <button
+                      key={key}
+                      className={`video-action-btn${activePopup === key ? ' active' : ''}`}
+                      onClick={() => togglePopup(key)}
+                    >
+                      <Icon size={18} />
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Playlist Strip */}
+              <div className="projects-playlist custom-box">
+                <h4 id="project-categories-hdr">Music Videos</h4>
+                <div className="playlist-items">
+                  {highlightVideos.map((v, i) => (
+                    <PlaylistCard
+                      key={v.id}
+                      video={v}
+                      isActive={currentVideoIndex === i}
+                      onClick={() => handleVideoSelect(i)}
+                    />
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
+
+          {activeTab === 'church-projects' && (
+            <div className="custom-box tab-placeholder">
+              <h2 className="custom-h2">Church Infrastructure Projects</h2>
+              <p className="custom-p" style={{ color: 'var(--color-black-60)', marginTop: '0.5rem' }}>
+                Information about our building extensions and infrastructure improvements will be available soon.
+              </p>
+            </div>
+          )}
+
+          {activeTab === 'behind-scenes' && (
+            <div className="custom-box tab-placeholder">
+              <h2 className="custom-h2">Behind the Scenes</h2>
+              <p className="custom-p" style={{ color: 'var(--color-black-60)', marginTop: '0.5rem' }}>
+                Exclusive behind-the-scenes content from our music production and worship team activities.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* ── Right Sidebar — always visible ── */}
+        <aside className="projects-sidebar">
+          <div className="custom-box related-content-box">
+            <h3 id="related-content-hdr">Related Content</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {sidebarVideos.map(video => (
+                <div key={video.id} className="related-item">
+                  <div className="related-thumb">
+                    <Play size={14} color="var(--color-black-60)" />
+                  </div>
+                  <p className="related-title">{video.title}</p>
+                  <p className="related-desc">{video.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      {/* ── Popup Modal ── */}
+      {activePopup && (
+        <>
+          <div className="bg-cover-popup" onClick={closePopup} />
+          <div className="popup-modal-wrap">
+            <div className="popup-modal">
+              <div className="popup-header">
+                <h3 className="custom-h3">
+                  {activePopup === 'description' && 'Description'}
+                  {activePopup === 'lyrics'      && 'Lyrics'}
+                  {activePopup === 'story'       && 'Behind the Song'}
+                </h3>
+                <button className="close-button" onClick={closePopup} aria-label="Close">
+                  {/*<ChevronUp size={18} style={{ transform: 'rotate(45deg)' }} />*/}
+                  <img className="closeThisComponents" src="/assets/system/close.png"/>
+                </button>
+              </div>
+
+              {activePopup === 'description' && (
+                <p className="custom-p" style={{ color: 'var(--color-black-80)' }}>
+                  {currentVideo.description}
+                </p>
+              )}
+              {activePopup === 'lyrics' && (
+                <pre className="custom-p" style={{ color: 'var(--color-black-80)', whiteSpace: 'pre-line' }}>
+                  {currentVideo.lyrics}
+                </pre>
+              )}
+              {activePopup === 'story' && (
+                <p className="custom-p" style={{ color: 'var(--color-black-80)' }}>
+                  {currentVideo.story}
+                </p>
               )}
             </div>
           </div>
-
-          {/* Main Content Area - Centered */}
-          <div className="lg:col-span-8">
-            {activeTab === 'music-videos' && (
-              <div className="space-y-6 relative">
-                {/* Featured Video */}
-                <div className="custom-box">
-                  {/* Large Video Player */}
-                  <div className="aspect-video bg-black rounded-lg mb-6 relative overflow-hidden group" style={{ minHeight: 'none' }}>
-                    {/* YouTube Embed */}
-                    <iframe 
-                      key={currentVideo.youtubeId} // Force re-render when video changes
-                      width="100%" 
-                      height="100%" 
-                      src={`https://www.youtube.com/embed/${currentVideo.youtubeId}?enablejsapi=1`}
-                      title={currentVideo.title}
-                      frameBorder="0" 
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                      referrerPolicy="strict-origin-when-cross-origin" 
-                      allowFullScreen
-                      className="absolute inset-0 w-full h-full rounded-lg"
-                    />
-                    
-                    {/* New MV Watermark - Only for new videos */}
-                    {currentVideo.isNew && (
-                      <div 
-                        className={`absolute top-4 right-4 z-30 transition-opacity duration-500 ${
-                          showOverlay ? 'opacity-100' : 'opacity-0'
-                        }`}
-                      >
-                        <div className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
-                          NEW MV
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Overlay Elements - Show/Hide based on state */}
-                    {showOverlay && (
-                      <>
-                        {/* Video Thumbnail */}
-                        <img 
-                          src={currentVideo.thumbnail} 
-                          alt={currentVideo.title}
-                          loading="lazy" 
-                          className="absolute inset-0 w-full h-full object-cover rounded-lg cursor-pointer z-10"
-                          onClick={() => handleVideoOverlayClick(currentVideo.id)}
-                        />
-                        
-                        {/* Play Button Overlay */}
-                        <div 
-                          className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-opacity-40 transition-all duration-300 cursor-pointer z-20"
-                          onClick={() => handleVideoOverlayClick(currentVideo.id)}
-                        >
-                          <div className="bg-white/25 rounded-full p-6 group-hover:scale-110 transition-transform duration-300">
-                            <Play size={48} className="text-black ml-1" />
-                          </div>
-                        </div>
-                        
-                        {/* Video Title Overlay */}
-                        <div className="absolute bottom-4 left-4 right-4 z-30">
-                          <div className="bg-black/30 rounded-lg p-4">
-                            <h3 className="text-white text-xl font-bold mb-1">{currentVideo.title}</h3>
-                            <p className="text-white opacity-80 text-sm">{currentVideo.artist}</p>
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Video Info */}
-                  <div className="mb-6">
-                    <h2 className="custom-h2 mb-2">{currentVideo.title}</h2>
-                    <p className="custom-span" style={{ color: 'var(--color-black-60)' }}>
-                      {currentVideo.artist}
-                    </p>
-                    {currentVideo.isNew && (
-                      <span className="inline-block bg-red-500 text-white text-xs px-2 py-1 rounded-full font-bold mt-2">
-                        NEW RELEASE
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Action Buttons - Horizontal Layout */}
-                  <div className="flex flex-wrap gap-3 justify-center">
-                    <button
-                      onClick={() => togglePopup('description')}
-                      className="flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-200 hover:scale-105 flex-1 min-w-0 justify-center sm:flex-initial sm:min-w-[140px]"
-                      style={{
-                        background: activePopup === 'description' ? 'var(--color-black-90)' : 'var(--bg-main-box)',
-                        color: activePopup === 'description' ? 'var(--color-white)' : 'var(--color-black)'
-                      }}
-                    >
-                      <FileText size={20} />
-                      <span className="custom-span font-medium">Description</span>
-                    </button>
-                    
-                    <button
-                      onClick={() => togglePopup('lyrics')}
-                      className="flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-200 hover:scale-105 flex-1 min-w-0 justify-center sm:flex-initial sm:min-w-[140px]"
-                      style={{
-                        background: activePopup === 'lyrics' ? 'var(--color-black-90)' : 'var(--bg-main-box)',
-                        color: activePopup === 'lyrics' ? 'var(--color-white)' : 'var(--color-black)'
-                      }}
-                    >
-                      <Music2 size={20} />
-                      <span className="custom-span font-medium">Lyrics</span>
-                    </button>
-                    
-                    <button
-                      onClick={() => togglePopup('story')}
-                      className="flex items-center gap-2 px-6 py-3 rounded-lg transition-all duration-200 hover:scale-105 flex-1 min-w-0 justify-center sm:flex-initial sm:min-w-[140px]"
-                      style={{
-                        background: activePopup === 'story' ? 'var(--color-black-90)' : 'var(--bg-main-box)',
-                        color: activePopup === 'story' ? 'var(--color-white)' : 'var(--color-black)'
-                      }}
-                    >
-                      <BookOpen size={20} />
-                      <span className="custom-span font-medium">Story</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Popup Modal */}
-                {activePopup && (
-                  <>
-                    {/* Overlay */}
-                    <div 
-                      className="bg-cover-popup fixed inset-0 bg-black bg-opacity-50 z-40"
-                      onClick={closePopup}
-                    ></div>
-                    
-                    {/* Popup Content */}
-                    <div className="fixed inset-4 lg:inset-20 z-50 flex items-center justify-center">
-                      <div 
-                        className="custom-box max-w-4xl w-full max-h-full overflow-y-auto"
-                        style={{ background: 'var(--bg-main)' }}
-                      >
-                        <div className="flex items-center justify-between mb-6">
-                          <h3 className="custom-h3">
-                            {activePopup === 'description' && 'Description'}
-                            {activePopup === 'lyrics' && 'Lyrics'}
-                            {activePopup === 'story' && 'Behind the Song'}
-                          </h3>
-                          <button
-                            onClick={closePopup}
-                            className="close-button p-2 rounded-full hover:bg-gray-100 transition-colors"
-                          >
-                            <ChevronUp size={24} style={{ transform: 'rotate(45deg)' }} />
-                          </button>
-                        </div>
-
-                        <div className="space-y-4">
-                          {activePopup === 'description' && (
-                            <p className="custom-p" style={{ color: 'var(--color-black-80)' }}>
-                              {currentVideo.description}
-                            </p>
-                          )}
-
-                          {activePopup === 'lyrics' && (
-                            <pre className="custom-p whitespace-pre-line" style={{ color: 'var(--color-black-80)' }}>
-                              {currentVideo.lyrics}
-                            </pre>
-                          )}
-
-                          {activePopup === 'story' && (
-                            <p className="custom-p" style={{ color: 'var(--color-black-80)' }}>
-                              {currentVideo.story}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-
-            {activeTab === 'church-projects' && (
-              <div className="custom-box">
-                <h2 className="custom-h2 mb-4">Church Infrastructure Projects</h2>
-                <p className="custom-p" style={{ color: 'var(--color-black-60)' }}>
-                  Information about our building extensions and infrastructure improvements will be available soon.
-                </p>
-              </div>
-            )}
-
-            {activeTab === 'behind-scenes' && (
-              <div className="custom-box">
-                <h2 className="custom-h2 mb-4">Behind the Scenes</h2>
-                <p className="custom-p" style={{ color: 'var(--color-black-60)' }}>
-                  Exclusive behind-the-scenes content from our music production and worship team activities.
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Right Sidebar - Related Videos */}
-          <div className="lg:col-span-2">
-            <div className="custom-box sticky top-6">
-              <h3 id="related-content-hdr" className="custom-h4 mb-4">Related Content</h3>
-              <div className="space-y-4">
-                {sidebarVideos.map((video) => (
-                  <div key={video.id} className="p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
-                    <div className="w-full h-20 bg-gradient-to-br from-gray-200 to-gray-300 rounded mb-2 flex items-center justify-center">
-                      <Play size={16} style={{ color: 'var(--color-black-60)' }} />
-                    </div>
-                    <div>
-                      <h4 className="custom-span font-medium line-clamp-2 mb-1 text-xs leading-tight">
-                        {video.title}
-                      </h4>
-                      <p 
-                        className="custom-caption line-clamp-1 text-xs"
-                        style={{ color: 'var(--color-black-60)' }}
-                      >
-                        {video.description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 };

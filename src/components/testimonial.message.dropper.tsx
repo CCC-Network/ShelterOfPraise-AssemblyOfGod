@@ -1,27 +1,45 @@
 // src/pages/testimonials/components/testimonial.message.dropper.tsx
 import { useState } from "react";
 import { X, MessageCircle, Upload, Link as LinkIcon, Loader2 } from "lucide-react";
-import { submitTestimonial } from "../../../utils/testimonials.data";
+import { submitTestimonial } from "../testimonials.data";
 
-// ── Types ─────────────────────────────────────────────────────
 type SubmitStatus = "idle" | "sending" | "success" | "error";
 
-// ✅ Props interface — accepts onSubmitted callback from parent
-interface Props {
-  onSubmitted?: () => void;
-}
-
 const ROLES = [
-  "Guest", "Church Member", "Pastor", "Associate Pastor",
-  "Youth Leader", "Worship Leader", "Choir Member", "Musician",
-  "Sunday School Teacher", "Kids Ministry Volunteer", "Usher",
-  "Media Team", "Technical Team", "Outreach Volunteer", "Missionary",
-  "Church Staff", "Elder", "Deacon", "Ministry Head", "Small Group Leader",
-  "Parent", "Student", "Visitor", "Friend", "Online Viewer",
-  "Donor", "Partner", "Other",
+  "Guest",
+  "Church Member",
+  "Pastor",
+  "Associate Pastor",
+  "Youth Leader",
+  "Worship Leader",
+  "Choir Member",
+  "Musician",
+  "Sunday School Teacher",
+  "Kids Ministry Volunteer",
+  "Usher",
+  "Media Team",
+  "Technical Team",
+  "Outreach Volunteer",
+  "Missionary",
+  "Church Staff",
+  "Elder",
+  "Deacon",
+  "Ministry Head",
+  "Small Group Leader",
+  "Parent",
+  "Student",
+  "Visitor",
+  "Friend",
+  "Online Viewer",
+  "Donor",
+  "Partner",
+  "Other",
 ];
 
-// ✅ Component now accepts Props
+interface Props {
+  onSubmitted?: () => void; // parent calls refetch when this fires
+}
+
 const TestimonialMessageDropper = ({ onSubmitted }: Props) => {
   const [open, setOpen]               = useState(false);
   const [imageFile, setImageFile]     = useState<File | null>(null);
@@ -33,7 +51,7 @@ const TestimonialMessageDropper = ({ onSubmitted }: Props) => {
   const [status, setStatus]           = useState<SubmitStatus>("idle");
   const [errorMsg, setErrorMsg]       = useState("");
 
-  // ── Image: local file upload ──────────────────────────────
+  // ── Image handlers ──────────────────────────────────────────
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -49,7 +67,6 @@ const TestimonialMessageDropper = ({ onSubmitted }: Props) => {
     setErrorMsg("");
   };
 
-  // ── Image: URL link ───────────────────────────────────────
   const handleImageLink = (e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value;
     setImageLink(url);
@@ -57,7 +74,7 @@ const TestimonialMessageDropper = ({ onSubmitted }: Props) => {
     setImageFile(null);
   };
 
-  // ── Reset form ────────────────────────────────────────────
+  // ── Reset form ───────────────────────────────────────────────
   const resetForm = () => {
     setName("");
     setRole("");
@@ -74,18 +91,17 @@ const TestimonialMessageDropper = ({ onSubmitted }: Props) => {
     resetForm();
   };
 
-  // ── Submit → Supabase ─────────────────────────────────────
+  // ── Submit ───────────────────────────────────────────────────
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!name.trim())    { setErrorMsg("Please enter your name.");    return; }
-    if (!role)           { setErrorMsg("Please select your role.");   return; }
+    if (!name.trim()) { setErrorMsg("Please enter your name."); return; }
+    if (!role)        { setErrorMsg("Please select your role."); return; }
     if (!message.trim()) { setErrorMsg("Please write your testimonial."); return; }
 
     setStatus("sending");
     setErrorMsg("");
 
-    // ✅ Calls real Supabase insert via testimonials.data.ts
     const result = await submitTestimonial({
       name,
       role,
@@ -101,7 +117,7 @@ const TestimonialMessageDropper = ({ onSubmitted }: Props) => {
 
     setStatus("success");
 
-    // ✅ Notify parent page to refetch the testimonials list
+    // Notify parent to refetch the testimonials list
     onSubmitted?.();
 
     setTimeout(() => {
@@ -117,9 +133,9 @@ const TestimonialMessageDropper = ({ onSubmitted }: Props) => {
       <button
         onClick={() => setOpen(true)}
         className="
-          fixed bottom-6 right-6 z-40
+          fixed bottom-6 left-6 z-40
           bg-blue-600 hover:bg-blue-700
-          text-white p-4 rounded-full shadow-xl
+          text-white px-5 py-3 rounded-full shadow-xl
           flex items-center gap-2 font-semibold
           transition-all duration-200 hover:scale-105
         "
@@ -149,7 +165,7 @@ const TestimonialMessageDropper = ({ onSubmitted }: Props) => {
               Your story can inspire others. 🙏
             </p>
 
-            {/* ── Success state ── */}
+            {/* Success state */}
             {status === "success" ? (
               <div className="text-center py-8">
                 <p className="text-4xl mb-3">🎉</p>
@@ -218,14 +234,13 @@ const TestimonialMessageDropper = ({ onSubmitted }: Props) => {
                     Your Name <span className="text-red-400">*</span>
                   </label>
                   <input
-                    id="testimonyName"
                     type="text"
                     placeholder="Enter your name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     disabled={isSending}
                     required
-                    className="w-full mt-1 px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-400 outline-none"
+                    className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-400 outline-none"
                   />
                 </div>
 
@@ -235,12 +250,11 @@ const TestimonialMessageDropper = ({ onSubmitted }: Props) => {
                     Your Role <span className="text-red-400">*</span>
                   </label>
                   <select
-                    id="testimonyRole"
                     value={role}
                     onChange={(e) => setRole(e.target.value)}
                     disabled={isSending}
                     required
-                    className="w-full mt-1 px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-400 outline-none bg-white"
+                    className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-400 outline-none bg-white"
                   >
                     <option value="">Select your role</option>
                     {ROLES.map((r) => (
@@ -255,14 +269,13 @@ const TestimonialMessageDropper = ({ onSubmitted }: Props) => {
                     Your Testimonial <span className="text-red-400">*</span>
                   </label>
                   <textarea
-                    id="testimonyMessage"
                     rows={4}
                     placeholder="Write your testimonial..."
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     disabled={isSending}
                     required
-                    className="w-full mt-1 px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-400 outline-none resize-none"
+                    className="w-full px-4 py-2 rounded-lg border focus:ring-2 focus:ring-blue-400 outline-none resize-none"
                   />
                 </div>
 
@@ -276,15 +289,17 @@ const TestimonialMessageDropper = ({ onSubmitted }: Props) => {
                   type="submit"
                   disabled={isSending}
                   className="
-                    w-full mt-6 bg-blue-600 hover:bg-blue-700
+                    w-full mt-5 bg-blue-600 hover:bg-blue-700
                     text-white py-3 rounded-lg font-semibold
-                    transition-all duration-200
-                    flex items-center justify-center gap-2
+                    transition-all duration-200 flex items-center justify-center gap-2
                     disabled:opacity-60 disabled:cursor-not-allowed
                   "
                 >
                   {isSending ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" /> Submitting...</>
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Submitting...
+                    </>
                   ) : (
                     "Submit Testimonial"
                   )}

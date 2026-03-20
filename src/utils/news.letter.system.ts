@@ -210,65 +210,13 @@ function resetButton(button: HTMLButtonElement) {
 
 */}
 
-import { supabase } from "../lib/supabaseClient"; // ✅ Reuse existing client
+// src/utils/news.letter.system.ts
+import { supabase } from "../lib/supabaseClient";
 
-export function setupNewsletter() {
-  const emailInput = document.querySelector<HTMLInputElement>("#email-newsletter");
-  const subscribeButton = document.querySelector<HTMLButtonElement>("#subscribe-button");
-
-  if (!emailInput || !subscribeButton) return;
-
-  subscribeButton.addEventListener("click", async () => {
-    const email = emailInput.value.trim();
-
-    if (!email || !validateEmail(email)) {
-      alert("⚠️ Please enter a valid email address.");
-      return;
-    }
-
-    subscribeButton.disabled = true;
-    subscribeButton.textContent = "Subscribing...";
-
-    try {
-      // 1️⃣ Store email in Supabase table
-      const { error } = await supabase
-        .from("newsletter_subscribers")
-        .insert([{ email }]);
-
-      if (error) {
-        if (error.code === "23505") {
-          alert("📧 This email is already subscribed.");
-        } else {
-          console.error("Supabase error:", error);
-          alert("❌ Subscription failed. Try again later.");
-        }
-        resetButton(subscribeButton);
-        return;
-      }
-
-      // 2️⃣ Call Supabase Edge Function to send email
-      const { data, error: sendError } = await supabase.functions.invoke("newsletter", {
-        body: JSON.stringify({ email }),
-      });
-
-      if (sendError) {
-        console.error(sendError);
-        alert("🚫 Failed to send confirmation email.");
-      } else {
-        console.log("Resend response:", data);
-        alert("✅ Subscribed successfully! Please check your inbox.");
-      }
-
-      subscribeButton.textContent = "✅ Subscribed!";
-      emailInput.value = "";
-
-      setTimeout(() => resetButton(subscribeButton), 3000);
-    } catch (err) {
-      console.error("Newsletter error:", err);
-      alert("🚫 Something went wrong.");
-      resetButton(subscribeButton);
-    }
-  });
+export interface NewsletterResult {
+  success: boolean;
+  alreadySubscribed?: boolean;
+  error?: string;
 }
 
 function validateEmail(email: string): boolean {
@@ -276,8 +224,91 @@ function validateEmail(email: string): boolean {
   return re.test(email.toLowerCase());
 }
 
-function resetButton(button: HTMLButtonElement) {
-  button.disabled = false;
-  button.textContent = "Subscribe";
+/**
+ * subscribeToNewsletter
+ * Call this directly from your React component.
+ * Returns a result object — no alert() calls, no DOM access.
+ */
+export async function subscribeToNewsletter(
+  email: string
+): Promise<NewsletterResult> {
+  const trimmed = email.trim();
+
+  if (!trimmed || !validateEmail(trimmed)) {
+    return { success: false, error: "Please enter a valid email address." };
+  }
+
+  try {
+    // ── Step 1: Insert into Supabase ──
+    const { error } = await supabase
+      .from("newsletter_subscribers")
+      .insert([{ email: trimmed.toLowerCase() }]);
+
+    if (error) {
+      // Duplicate email — unique constraint violation
+      if (error.code === "23505") {
+        return { success: false, alreadySubscribed: true };
+      }
+      console.error("[Newsletter] Supabase insert error:", error.message, error.code);
+      return { success: false, error: "Subscription failed. Please try again." };
+    }
+
+    // ── Step 2: Trigger confirmation email via Edge Function ──
+    const { error: sendError } = await supabase.functions.invoke("newsletter", {
+      body: JSON.stringify({ email: trimmed.toLowerCase() }),
+    });
+
+    if (sendError) {
+      // Email was saved but confirmation failed — not critical, still a success
+      console.warn("[Newsletter] Confirmation email failed:", sendError.message);
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error("[Newsletter] Unexpected error:", err);
+    return { success: false, error: "Network error. Please check your connection." };
+  }
 }
 
+/**
+ * setupNewsletter (legacy DOM-based version)
+ * Kept for backwards compatibility if called outside React.
+ * Prefer using subscribeToNewsletter() directly in React components.
+ */
+export function setupNewsletter() {
+  const emailInput     = document.querySelector<HTMLInputElement>("#email-newsletter");
+  const subscribeButton = document.querySelector<HTMLButtonElement>("#subscribe-button");
+
+  if (!emailInput || !subscribeButton) return;
+
+  subscribeButton.addEventListener("click", async () => {
+    const email = emailInput.value.trim();
+
+    subscribeButton.disabled = true;
+    subscribeButton.textContent = "Subscribing...";
+
+    const result = await subscribeToNewsletter(email);
+
+    if (result.alreadySubscribed) {
+      alert("📧 This email is already subscribed.");
+      subscribeButton.disabled = false;
+      subscribeButton.textContent = "Subscribe";
+      return;
+    }
+
+    if (!result.success) {
+      alert(result.error ?? "Something went wrong.");
+      subscribeButton.disabled = false;
+      subscribeButton.textContent = "Subscribe";
+      return;
+    }
+
+    subscribeButton.textContent = "✅ Subscribed!";
+    emailInput.value = "";
+
+    setTimeout(() => {
+      subscribeButton.disabled = false;
+      subscribeButton.textContent = "Subscribe";
+    }, 3000);
+  });
+}

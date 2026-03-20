@@ -45,12 +45,13 @@ Our site layout includes:
 6. **Serve** – Join our Ministry Teams  
 7. **Privacy Policy**  
 8. **About Us** – History, Members  
-9. **Visit Us** – Location & Contact Form  
-10. **Giving** – Support our mission  
-11. **CCC Family** – Our Parent Organization  
-12. **Outreach** – Evangelism & Community Work  
-13. **Upcoming Events**  
-14. **Projects** – Worship Music & Publishing 🎶  
+9. **Visit Us** – Location & Contact Form
+10. **Products** – Products  
+11. **Giving** – Support our mission  
+12. **CCC Family** – Our Parent Organization  
+13. **Outreach** – Evangelism & Community Work  
+14. **Upcoming Events**  
+15. **Projects** – Worship Music & Publishing 🎶  
 
 ---
 

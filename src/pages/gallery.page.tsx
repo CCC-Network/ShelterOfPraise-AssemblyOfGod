@@ -1,7 +1,13 @@
-import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, X, Search, Grid, List, Columns, Square, Grid3x3, ChevronDown } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import {
+  ChevronLeft, ChevronRight, X, Search,
+  Grid2x2, List, Columns3, Square, LayoutGrid,
+  Folder, FolderOpen, FileImage, Clock, ChevronDown,
+  Images
+} from 'lucide-react';
+import '../styles/gallery.page.css';
 
-// Type definitions
+/* ─── Types ─────────────────────────────────────────── */
 interface GalleryImage {
   id: number;
   src: string;
@@ -21,7 +27,7 @@ interface GalleryData {
 
 interface ViewMode {
   id: string;
-  icon: any;
+  Icon: React.ElementType;
   label: string;
 }
 
@@ -215,230 +221,271 @@ const galleryData: GalleryData = {
   ]
 };
 
+/* ─── View modes ─────────────────────────────────────── */
 const viewModes: ViewMode[] = [
-  { id: 'grid', icon: Grid, label: 'Grid View' },
-  { id: 'list', icon: List, label: 'List View' },
-  { id: 'river', icon: Columns, label: 'River View' },
-  { id: 'large', icon: Square, label: 'Large View' },
-  { id: 'pinterest', icon: Grid3x3, label: 'Pinterest View' }
+  { id: 'grid',      Icon: Grid2x2,     label: 'Grid'       },
+  { id: 'list',      Icon: List,        label: 'List'       },
+  { id: 'river',     Icon: Columns3,    label: 'River'      },
+  { id: 'large',     Icon: Square,      label: 'Large'      },
+  { id: 'pinterest', Icon: LayoutGrid,  label: 'Pinterest'  },
 ];
 
+/* ─── Helpers ────────────────────────────────────────── */
+/** Returns the most recent year that has at least one event with images */
+function getDefaultYear(data: GalleryData): string {
+  const sorted = Object.keys(data).sort((a, b) => parseInt(b) - parseInt(a));
+  for (const y of sorted) {
+    if (data[y]?.some(e => e.images.length > 0)) return y;
+  }
+  return sorted[0] ?? '';
+}
+
+/* ─── Component ──────────────────────────────────────── */
 const GalleryPage = () => {
-  const [selectedYear, setSelectedYear] = useState<string>('2024');
-  const [selectedEvent, setSelectedEvent] = useState<GalleryEvent | null>(null);
-  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
-  const [viewMode, setViewMode] = useState<string>('grid');
-  const [searchTerm, setSearchTerm] = useState<string>('');
-  const [isViewModeOpen, setIsViewModeOpen] = useState<boolean>(false);
+  const defaultYear                               = getDefaultYear(galleryData);
+  const [selectedYear,  setSelectedYear]          = useState<string>(defaultYear);
+  const [selectedEvent, setSelectedEvent]         = useState<GalleryEvent | null>(null);
+  const [selectedImage, setSelectedImage]         = useState<GalleryImage | null>(null);
+  const [viewMode,      setViewMode]              = useState<string>('grid');
+  const [searchTerm,    setSearchTerm]            = useState<string>('');
+  const [subfolders,    setSubfolders]            = useState<boolean>(false);
+  const [vmOpen,        setVmOpen]                = useState<boolean>(false);
 
-  const years = Object.keys(galleryData).sort((a, b) => parseInt(b) - parseInt(a));
+  const vmRef = useRef<HTMLDivElement>(null);
 
-  // Auto-select first event when year changes
+  /* Auto-select first event when year changes */
   useEffect(() => {
     const yearData = galleryData[selectedYear];
-    if (yearData && yearData.length > 0) {
+    if (yearData?.length) {
       setSelectedEvent(yearData[0]);
+    } else {
+      setSelectedEvent(null);
     }
   }, [selectedYear]);
 
-  // Get all images from selected event
-  const getCurrentImages = (): GalleryImage[] => {
-    if (!selectedEvent) return [];
-    return selectedEvent.images || [];
-  };
-
-  // Image popup navigation
-  const handleImageClick = (image: GalleryImage) => {
-    setSelectedImage(image);
-  };
-
-  const handlePrevImage = () => {
-    if (!selectedImage) return;
-    const images = getCurrentImages();
-    const currentIndex = images.findIndex(img => img.id === selectedImage.id);
-    const prevIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
-    setSelectedImage(images[prevIndex]);
-  };
-
-  const handleNextImage = () => {
-    if (!selectedImage) return;
-    const images = getCurrentImages();
-    const currentIndex = images.findIndex(img => img.id === selectedImage.id);
-    const nextIndex = currentIndex < images.length - 1 ? currentIndex + 1 : 0;
-    setSelectedImage(images[nextIndex]);
-  };
-
-  const closePopup = () => {
-    setSelectedImage(null);
-  };
-
-  // Get current view mode info
-  const currentViewMode = viewModes.find(mode => mode.id === viewMode) || viewModes[0];
-
-  // Render images based on view mode
-  const renderImages = () => {
-    const images = getCurrentImages();
-    
-    const getGridClass = () => {
-      switch (viewMode) {
-        case 'grid': return 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4';
-        case 'list': return 'flex flex-col gap-3';
-        case 'river': return 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
-        case 'large': return 'grid grid-cols-1 md:grid-cols-2 gap-6';
-        case 'pinterest': return 'columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-4';
-        default: return 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4';
+  /* Close view-mode dropdown on outside click */
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (vmRef.current && !vmRef.current.contains(e.target as Node)) {
+        setVmOpen(false);
       }
     };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  /* Sorted years (desc) */
+  const years = Object.keys(galleryData).sort((a, b) => parseInt(b) - parseInt(a));
+
+  /* Current year (for "CURRENT" badge) */
+  const currentYear = String(new Date().getFullYear());
+
+  /* Images to show — filtered by search */
+  const allImages: GalleryImage[] = selectedEvent?.images ?? [];
+  const filteredImages = searchTerm.trim()
+    ? allImages.filter(img =>
+        img.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        img.description.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : allImages;
+
+  /* Lightbox navigation */
+  const lightboxImages = filteredImages;
+  const currentLightboxIdx = selectedImage
+    ? lightboxImages.findIndex(i => i.id === selectedImage.id)
+    : -1;
+
+  const prevImage = () => {
+    if (currentLightboxIdx <= 0) {
+      setSelectedImage(lightboxImages[lightboxImages.length - 1]);
+    } else {
+      setSelectedImage(lightboxImages[currentLightboxIdx - 1]);
+    }
+  };
+
+  const nextImage = () => {
+    if (currentLightboxIdx >= lightboxImages.length - 1) {
+      setSelectedImage(lightboxImages[0]);
+    } else {
+      setSelectedImage(lightboxImages[currentLightboxIdx + 1]);
+    }
+  };
+
+  /* Keyboard navigation */
+  useEffect(() => {
+    if (!selectedImage) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft')  prevImage();
+      if (e.key === 'ArrowRight') nextImage();
+      if (e.key === 'Escape')     setSelectedImage(null);
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedImage, currentLightboxIdx]);
+
+  /* Active view mode */
+  const activeVM = viewModes.find(v => v.id === viewMode) ?? viewModes[0];
+
+  /* ── Image grid renderer ── */
+  const renderImages = () => {
+    if (!filteredImages.length) {
+      return (
+        <div className="gallery-empty">
+          <Images size={48} />
+          <p>No images found</p>
+        </div>
+      );
+    }
+
+    if (viewMode === 'list') {
+      return (
+        <div className="view-list">
+          {filteredImages.map(img => (
+            <div key={img.id} className="list-item" onClick={() => setSelectedImage(img)}>
+              <img src={img.src} alt={img.name} loading="lazy" />
+              <div className="list-item-info">
+                <h4>{img.name}</h4>
+                <p>{img.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    const gridClass = {
+      grid:      'view-grid',
+      river:     'view-river',
+      large:     'view-large',
+      pinterest: 'view-pinterest',
+    }[viewMode] ?? 'view-grid';
 
     return (
-      <div className={getGridClass()}>
-        {images.map((image) => (
+      <div className={gridClass}>
+        {filteredImages.map(img => (
           <div
-            key={image.id}
-            className={`cursor-pointer hover:opacity-80 transition-opacity ${
-              viewMode === 'list' ? 'flex gap-3 p-3 bg-white rounded-lg shadow-sm' : 
-              viewMode === 'pinterest' ? 'break-inside-avoid mb-4' : ''
-            }`}
-            onClick={() => handleImageClick(image)}
+            key={img.id}
+            className="gallery-img-card"
+            onClick={() => setSelectedImage(img)}
           >
-            {viewMode === 'list' ? (
-              <>
-                <img
-                  src={image.src}
-                  alt={image.name}
-                  className="w-20 h-20 object-cover rounded-lg flex-shrink-0"
-                />
-                <div className="flex-1">
-                  <h4 className="custom-h4 mb-1">{image.name}</h4>
-                  <p className="custom-span text-xs">{image.description}</p>
-                </div>
-              </>
-            ) : (
-              <>
-                <img
-                  src={image.src}
-                  alt={image.name}
-                  className={`w-full object-cover rounded-lg ${
-                    viewMode === 'large' ? 'h-64' : 
-                    viewMode === 'pinterest' ? 'h-auto' : 'h-48'
-                  }`}
-                />
-              </>
-            )}
+            <img src={img.src} alt={img.name} loading="lazy" />
+            <div className="gallery-img-hover-info">
+              <p>{img.name}</p>
+            </div>
           </div>
         ))}
       </div>
     );
   };
 
+  /* ── render ── */
   return (
-    <div className="flex h-screen bg-gray-50">
-      {/* Floating Sidebar */}
-      <div className="w-64 bg-white shadow-lg flex flex-col">
-        {/* Header */}
-        <div className="p-4 border-b">
-          <h2 className="custom-h3">Gallery Library</h2>
-          <div className="flex items-center gap-2 mt-2">
-            <span className="text-sm text-gray-600">💖 List of events</span>
-          </div>
+    <div className="gallery-page">
+
+      {/* ── Sidebar ── */}
+      <aside className="gallery-sidebar">
+        <div className="gallery-sidebar-header">
+          <h2>Gallery Library</h2>
+          <p className="gallery-sidebar-sub">
+            <Images size={12} />
+            Event photo archive
+          </p>
         </div>
 
-        {/* Year Folders */}
-        <div className="flex-1 overflow-y-auto p-4">
-          <div className="space-y-2">
-            <div className="text-sm text-gray-600 mb-2">⏳Timeline</div>
-            
-            {years.map((year) => (
+        <div className="gallery-sidebar-body">
+          <div className="sidebar-section-label">
+            <Clock size={11} />
+            Timeline
+          </div>
+
+          {years.map(year => {
+            const isActiveYear = selectedYear === year;
+            const isCurrent    = year === currentYear;
+            const events       = galleryData[year] ?? [];
+
+            return (
               <div key={year}>
                 <button
+                  className={`year-btn${isActiveYear ? ' active' : ''}`}
                   onClick={() => setSelectedYear(year)}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                    selectedYear === year
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
                 >
-                  📁 {year}
+                  {isActiveYear
+                    ? <FolderOpen size={14} />
+                    : <Folder size={14} />
+                  }
+                  {year}
+                  {isCurrent && (
+                    <span className="year-btn-badge">NOW</span>
+                  )}
                 </button>
-                
-                {/* Event Sub-folders */}
-                {selectedYear === year && galleryData[year] && (
-                  <div className="ml-4 mt-1 space-y-1">
-                    {galleryData[year].map((event, index) => (
+
+                {isActiveYear && events.length > 0 && (
+                  <div className="event-list">
+                    {events.map((event, idx) => (
                       <button
-                        key={index}
+                        key={idx}
+                        className={`event-btn${selectedEvent === event ? ' active' : ''}`}
                         onClick={() => setSelectedEvent(event)}
-                        className={`w-full text-left px-3 py-2 rounded-lg text-xs transition-colors ${
-                          selectedEvent === event
-                            ? 'bg-blue-50 text-blue-700 border-l-2 border-blue-500'
-                            : 'text-gray-600 hover:bg-gray-50'
-                        }`}
                       >
-                        📄 {event.eventName}
-                        <div className="text-gray-500 text-xs mt-1">
-                          {event.date} • {event.images.length} images
-                        </div>
+                        <span className="event-btn-name">{event.eventName}</span>
+                        <span className="event-btn-meta">
+                          <FileImage size={10} />
+                          {event.date} · {event.images.length} photos
+                        </span>
                       </button>
                     ))}
                   </div>
                 )}
               </div>
-            ))}
-
-            <div className="text-sm text-gray-600"></div>
-            <div className="text-sm text-gray-600"></div>
-          </div>
+            );
+          })}
         </div>
-      </div>
+      </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      {/* ── Main ── */}
+      <div className="gallery-main">
+
         {/* Top Bar */}
-        <div className="bg-white shadow-sm p-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+        <div className="gallery-topbar">
+          <div className="gallery-topbar-left">
+            <div className="gallery-search-wrap">
+              <Search size={14} />
               <input
-              id="search-input-gallery"
+                id="search-input-gallery"
                 type="text"
-                placeholder="Search"
-                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent w-64"
+                placeholder="Search photos…"
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
               />
             </div>
-            <label className="flex items-center gap-2 text-sm text-black">
-              <input type="checkbox" className="rounded" />
+            <label className="gallery-subfolder-label">
+              <input
+                type="checkbox"
+                checked={subfolders}
+                onChange={e => setSubfolders(e.target.checked)}
+              />
               Search in subfolders
             </label>
           </div>
 
-          {/* View Mode Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setIsViewModeOpen(!isViewModeOpen)}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-lg text-sm hover:bg-gray-200 transition-colors"
-            >
-              <currentViewMode.icon className="w-4 h-4" />
-              <ChevronDown className="w-4 h-4" />
+          {/* View mode */}
+          <div className="viewmode-dropdown-wrap" ref={vmRef}>
+            <button className="viewmode-trigger" onClick={() => setVmOpen(v => !v)}>
+              <activeVM.Icon size={15} />
+              <span style={{ fontSize: '0.8rem' }}>{activeVM.label}</span>
+              <ChevronDown size={13} />
             </button>
-            
-            {isViewModeOpen && (
-              <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-10">
-                {viewModes.map((mode) => (
+            {vmOpen && (
+              <div className="viewmode-menu">
+                {viewModes.map(({ id, Icon, label }) => (
                   <button
-                    key={mode.id}
-                    onClick={() => {
-                      setViewMode(mode.id);
-                      setIsViewModeOpen(false);
-                    }}
-                    className={`w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg ${
-                      viewMode === mode.id ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
-                    }`}
+                    key={id}
+                    className={`viewmode-option${viewMode === id ? ' active' : ''}`}
+                    onClick={() => { setViewMode(id); setVmOpen(false); }}
                   >
-                    <mode.icon className="w-4 h-4" />
-                    {mode.label}
+                    <Icon size={14} />
+                    {label}
                   </button>
                 ))}
               </div>
@@ -446,94 +493,75 @@ const GalleryPage = () => {
           </div>
         </div>
 
-        {/* Image Grid */}
-        <div className="flex-1 overflow-y-auto p-6">
+        {/* Content */}
+        <div className="gallery-content">
           {selectedEvent ? (
-            <div>
-              <div className="mb-6">
-                <h1 className="custom-h2 mb-2">{selectedEvent.eventName}</h1>
-                <p className="text-gray-600">{selectedEvent.date} • {selectedEvent.images.length} images</p>
+            <>
+              <div className="gallery-content-header">
+                <h1>{selectedEvent.eventName}</h1>
+                <p className="gallery-content-meta">
+                  <FileImage size={12} />
+                  {selectedEvent.date}
+                  &nbsp;·&nbsp;
+                  {filteredImages.length} {filteredImages.length === 1 ? 'photo' : 'photos'}
+                  {searchTerm && ` matching "${searchTerm}"`}
+                </p>
               </div>
               {renderImages()}
-            </div>
+            </>
           ) : (
-            <div className="flex items-center justify-center h-full text-gray-500">
-              <div className="text-center">
-                <div className="text-6xl mb-4">📁</div>
-                <p>Select a folder to view images</p>
-              </div>
+            <div className="gallery-empty">
+              <Folder size={52} />
+              <p>Select an event to view photos</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Image Popup */}
+      {/* ── Lightbox ── */}
       {selectedImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4">
-          <div className="relative max-w-5xl max-h-full bg-white rounded-lg overflow-hidden">
-            {/* Close button */}
-            <button
-              onClick={closePopup}
-              className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 z-10 bg-white rounded-full p-2"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <div className="lightbox-overlay" onClick={e => e.target === e.currentTarget && setSelectedImage(null)}>
+          <div className="lightbox-box">
 
-            {/* Previous button */}
-            <button
-              onClick={handlePrevImage}
-              className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800 z-10 bg-white rounded-full p-2"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-
-            {/* Next button */}
-            <button
-              onClick={handleNextImage}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-600 hover:text-gray-800 z-10 bg-white rounded-full p-2"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </button>
-
-            {/* Image */}
-            <div className="flex">
-              <div className="flex-1">
-                <img
-                  src={selectedImage.src}
-                  alt={selectedImage.name}
-                  className="w-full h-auto max-h-[80vh] object-contain"
-                />
+            {/* Image area */}
+            <div className="lightbox-img-area">
+              <button className="lightbox-close" onClick={() => setSelectedImage(null)} aria-label="Close">
+                {/*<X size={15} />*/}
+                <img className="closeThisGallery" src="/assets/system/close.png"/>
+              </button>
+              <button className="lightbox-nav prev" onClick={prevImage} aria-label="Previous">
+                {/*<ChevronLeft size={18} />*/}
+                <img className="lightboxGal-left" src="/assets/system/arrow-left.png" />
+              </button>
+              <img src={selectedImage.src} alt={selectedImage.name} />
+              <button className="lightbox-nav next" onClick={nextImage} aria-label="Next">
+                {/*<ChevronRight size={18} />*/}
+                <img className="lightboxGal-right" src="/assets/system/arrow-right.png" />
+              </button>
+              <div className="lightbox-counter">
+                {currentLightboxIdx + 1} / {lightboxImages.length}
               </div>
-              <div className="w-80 p-6 bg-gray-50">
-                <div className="mb-4">
-                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">Preview</span>
+            </div>
+
+            {/* Info panel */}
+            <div className="lightbox-info">
+              <span className="lightbox-badge">Preview</span>
+              <h3>{selectedImage.name}</h3>
+              <p>{selectedImage.description}</p>
+              <div className="lightbox-meta-row">
+                <div className="lightbox-meta-item">
+                  <strong>Event:</strong> {selectedEvent?.eventName}
                 </div>
-                <h3 className="custom-h3 mb-3">{selectedImage.name}</h3>
-                <p className="custom-p text-gray-700 mb-4">{selectedImage.description}</p>
-                
-                <div className="space-y-3 text-sm text-gray-600">
-                  <div>
-                    <strong>Event:</strong> {selectedEvent?.eventName}
-                  </div>
-                  <div>
-                    <strong>Date:</strong> {selectedEvent?.date}
-                  </div>
-                  <div>
-                    <strong>Type:</strong> Image
-                  </div>
+                <div className="lightbox-meta-item">
+                  <strong>Date:</strong> {selectedEvent?.date}
+                </div>
+                <div className="lightbox-meta-item">
+                  <strong>Type:</strong> Image
                 </div>
               </div>
             </div>
           </div>
         </div>
-      )}
-
-      {/* Click outside to close dropdown */}
-      {isViewModeOpen && (
-        <div 
-          className="fixed inset-0 z-5" 
-          onClick={() => setIsViewModeOpen(false)}
-        />
       )}
     </div>
   );

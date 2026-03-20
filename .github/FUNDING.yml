@@ -1,0 +1,23 @@
+# Funding configuration for GitHub Sponsors
+# These links will appear in the "Sponsor" button on your repository page
+
+# GitHub Sponsors username (optional)
+# github: your-username  # Replace with your GitHub username
+
+# Custom funding URLs (optional - maximum 4 URLs)
+custom:
+  - "https://www.patreon.com/your-username"  # Replace with your Patreon URL
+  - "https://www.buymeacoffee.com/your-username"  # Replace with your Buy Me a Coffee URL
+  - "https://ko-fi.com/your-username"  # Replace with your Ko-fi URL
+  - "https://paypal.me/your-username"  # Replace with your PayPal URL
+
+# Additional funding platforms (optional)
+# Uncomment and configure the platforms you use
+# patreon: # Your Patreon username
+# ko_fi: # Your Ko-fi username
+# tidelift: # Your Tidelift package name
+# community_bridge: # Your Community Bridge project name
+# liberapay: # Your Liberapay username
+# issuehunt: # Your IssueHunt username
+# otechie: # Your Otechie username
+# lfx_crowdfunding: # Your LFX Crowdfunding project name

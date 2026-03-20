@@ -1,606 +1,450 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import {
+  Target, Eye, Medal, ClipboardList,
+  HandHeart, Play, BookOpen, Download, FileText,
+  Users, Pause
+} from 'lucide-react';
+import '../styles/home.page.css';
 
-const HomePage = () => {
-  const [isVisible, setIsVisible] = useState({
-    purpose: false,
-    vision: false,
-    goal: false,
-    strategy: false,
-    hook: false,
-    video: false,
-    sermon: false
+/* ─── Types ─────────────────────────────────────────── */
+declare global {
+  interface Window {
+    YT: typeof YT;
+    onYouTubeIframeAPIReady: () => void;
+  }
+}
+
+interface VideoItem {
+  id: number;
+  title: string;
+  youtubeId: string;
+  subtitle: string;
+}
+
+/* ─── Data ───────────────────────────────────────────── */
+const videos: VideoItem[] = [
+  { id: 1, title: 'A Powerful Christian Sermon on Following God’s Will (Bisaya)', subtitle: 'Life of Obedience',    youtubeId: '6OsKUdMcQdY' },
+  { id: 2, title: 'GIVING BRINGS A RELEASE (FULL SERMON)',         subtitle: 'Giving is not losing — it is releasing heaven’s flow into our lives.', youtubeId: 'akri6Ph541Q' },
+  { id: 3, title: 'WHEN BROKEN BEGINNINGS SERVE A PERFECT PLAN',         subtitle: 'Many believers secretly carry silent questions?', youtubeId: 'r0SGqBEA63M'  },
+];
+
+/* How many seconds the carousel plays per visit before advancing */
+const PREVIEW_SECONDS = 10;
+/* After looping all videos once, each return visit plays this many MORE seconds */
+const EXTRA_SECONDS_PER_LOOP = 2;   // 3 → 5 → 7 → ... per subsequent full cycle
+
+/* ─── YouTube IFrame API loader ─────────────────────── */
+function loadYTApi(): Promise<void> {
+  return new Promise((resolve) => {
+    if (window.YT?.Player) { resolve(); return; }
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(tag);
+    window.onYouTubeIframeAPIReady = resolve;
   });
+}
 
-  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
+/* ─── Component ──────────────────────────────────────── */
+const HomePage = () => {
+  /* ── Scroll visibility ── */
+  const [visible, setVisible] = useState<Record<string, boolean>>({});
   const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // Sample video data
-  const videos = [
-    {
-      id: 1,
-      title: "Sunday Worship Service",
-      thumbnail: "https://img.youtube.com/vi/6OsKUdMcQdY/maxresdefault.jpg",
-      url: "https://youtu.be/6OsKUdMcQdY?si=KEVpdWWPvc3-xOdz"
-    },
-    {
-      id: 2,
-      title: "Youth Ministry",
-      thumbnail: "https://img.youtube.com/vi/rffjr1MMyKk/maxresdefault.jpg",
-      url: "https://youtu.be/rffjr1MMyKk?si=EHFeRPDpfd8DcbUI"
-    },
-    {
-      id: 3,
-      title: "Prayer Meeting",
-      thumbnail: "https://img.youtube.com/vi/VuZ8K356gN0/maxresdefault.jpg",
-      url: "https://youtu.be/VuZ8K356gN0?si=Vrw16DHZM0sKU2--"
-    }
-  ];
+  /* ── Carousel state ── */
+  const playerRef       = useRef<YT.Player | null>(null);
+  const playerDivId     = 'yt-carousel-player';
+  const [activeIdx, setActiveIdx]         = useState(0);
+  const [overlayHidden, setOverlayHidden] = useState(false); // user engaged
+  const [isPlaying, setIsPlaying]         = useState(false);
 
-  // Auto-rotate videos every 6 seconds
+  // Tracks how many full loops completed (drives extra preview time)
+  const loopCountRef   = useRef(0);
+  // Per-video resume positions (seconds) — advances after each preview
+  const resumePos      = useRef<number[]>(videos.map(() => 0));
+  // Timer refs
+  const previewTimer   = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const progressAnim   = useRef<ReturnType<typeof requestAnimationFrame> | null>(null);
+  const progressBarRef = useRef<HTMLDivElement | null>(null);
+  const autoRef        = useRef(true);   // false once user clicks play
+
+  /* ── Intersection observer ── */
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentVideoIndex((prev) => (prev + 1) % videos.length);
-    }, 6000);
-
-    return () => clearInterval(interval);
-  }, [videos.length]);
-
-  // Intersection Observer for scroll animations
-  useEffect(() => {
-    const observer = new IntersectionObserver(
+    observerRef.current = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const targetId = entry.target.getAttribute('data-section');
-            if (targetId) {
-              setIsVisible(prev => ({ ...prev, [targetId]: true }));
-            }
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            const key = e.target.getAttribute('data-section');
+            if (key) setVisible(prev => ({ ...prev, [key]: true }));
           }
         });
       },
       { threshold: 0.1, rootMargin: '50px' }
     );
-
-    const sections = document.querySelectorAll('[data-section]');
-    sections.forEach(section => {
-      observer.observe(section);
-    });
-
-    observerRef.current = observer;
-
-    return () => {
-      observer.disconnect();
-    };
+    document.querySelectorAll('[data-section]').forEach(el => observerRef.current!.observe(el));
+    return () => observerRef.current?.disconnect();
   }, []);
 
+  /* ── Progress bar animation ── */
+  const animateProgress = useCallback((durationMs: number) => {
+    if (!progressBarRef.current) return;
+    const bar = progressBarRef.current;
+    bar.style.transition = 'none';
+    bar.style.width = '0%';
+
+    const start = performance.now();
+    const tick = (now: number) => {
+      const elapsed = now - start;
+      const pct = Math.min((elapsed / durationMs) * 100, 100);
+      bar.style.width = `${pct}%`;
+      if (pct < 100) {
+        progressAnim.current = requestAnimationFrame(tick);
+      }
+    };
+    progressAnim.current = requestAnimationFrame(tick);
+  }, []);
+
+  const stopProgress = useCallback(() => {
+    if (progressAnim.current) cancelAnimationFrame(progressAnim.current);
+    if (progressBarRef.current) progressBarRef.current.style.width = '0%';
+  }, []);
+
+  /* ── Preview: seek + play for N seconds then advance ── */
+  const startPreview = useCallback((idx: number, player: YT.Player) => {
+    if (!autoRef.current) return;
+
+    if (previewTimer.current) clearTimeout(previewTimer.current);
+    stopProgress();
+
+    const previewDuration = PREVIEW_SECONDS + loopCountRef.current * EXTRA_SECONDS_PER_LOOP;
+    const startSec = resumePos.current[idx];
+
+    player.loadVideoById({ videoId: videos[idx].youtubeId, startSeconds: startSec });
+    player.unMute();
+    player.setVolume(0);   // muted for autoplay policy compliance; user click unmutes
+    player.playVideo();
+    setIsPlaying(true);
+
+    animateProgress(previewDuration * 1000);
+
+    previewTimer.current = setTimeout(() => {
+      if (!autoRef.current) return;
+      // Save resume position (wrap at video duration or cap at 300s)
+      resumePos.current[idx] = startSec + previewDuration;
+
+      // Advance to next video
+      const nextIdx = (idx + 1) % videos.length;
+      if (nextIdx === 0) loopCountRef.current += 1;
+
+      setActiveIdx(nextIdx);
+    }, previewDuration * 1000);
+  }, [animateProgress, stopProgress]);
+
+  /* ── Init YouTube player ── */
+  useEffect(() => {
+    let mounted = true;
+    loadYTApi().then(() => {
+      if (!mounted) return;
+      playerRef.current = new window.YT.Player(playerDivId, {
+        width: '100%',
+        height: '100%',
+        videoId: videos[0].youtubeId,
+        playerVars: {
+          autoplay: 1,
+          mute: 1,
+          controls: 0,
+          modestbranding: 1,
+          rel: 0,
+          playsinline: 1,
+        },
+        events: {
+          onReady: (e) => {
+            if (!mounted || !autoRef.current) return;
+            startPreview(0, e.target);
+          },
+          onStateChange: (e) => {
+            if (e.data === window.YT.PlayerState.PLAYING) setIsPlaying(true);
+            if (e.data === window.YT.PlayerState.PAUSED)  setIsPlaying(false);
+          },
+        },
+      });
+    });
+    return () => {
+      mounted = false;
+      if (previewTimer.current)  clearTimeout(previewTimer.current);
+      if (progressAnim.current)  cancelAnimationFrame(progressAnim.current);
+      playerRef.current?.destroy();
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* ── When activeIdx changes in auto mode, start next preview ── */
+  useEffect(() => {
+    if (!autoRef.current || !playerRef.current) return;
+    startPreview(activeIdx, playerRef.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeIdx]);
+
+  /* ── User clicks play → stop carousel, play fully, unmute ── */
+  const handleUserPlay = useCallback(() => {
+    autoRef.current = false;
+    if (previewTimer.current)  clearTimeout(previewTimer.current);
+    if (progressAnim.current)  cancelAnimationFrame(progressAnim.current);
+    if (progressBarRef.current) progressBarRef.current.style.width = '100%';
+
+    setOverlayHidden(true);
+
+    const player = playerRef.current;
+    if (!player) return;
+    player.setVolume(100);
+    player.unMute();
+    player.seekTo(resumePos.current[activeIdx], true);
+    player.playVideo();
+  }, [activeIdx]);
+
+  /* ── User clicks a dot to jump ── */
+  const handleDotClick = useCallback((idx: number) => {
+    if (!autoRef.current) {
+      // Already in user mode — just switch video
+      setActiveIdx(idx);
+      resumePos.current[idx] = 0;
+      playerRef.current?.loadVideoById({ videoId: videos[idx].youtubeId });
+      playerRef.current?.playVideo();
+      return;
+    }
+    setActiveIdx(idx);
+  }, []);
+
+  /* ── Toggle pause / resume in user mode ── */
+  const handleTogglePlay = useCallback(() => {
+    if (!playerRef.current || autoRef.current) return;
+    if (isPlaying) {
+      playerRef.current.pauseVideo();
+    } else {
+      playerRef.current.playVideo();
+    }
+  }, [isPlaying]);
+
+  /* ─── render ─────────────────────────────────────────── */
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: 'var(--bg-main)',
-      overflow: 'hidden'
-    }}>
-      {/* Hero Section */}
-      <div style={{ 
-        maxWidth: '1200px', 
-        margin: '0 auto', 
-        padding: '5rem 1rem' 
-      }}>
-        <div style={{ textAlign: 'center', marginBottom: '5rem' }}>
-          <h1 style={{
-            fontSize: 'var(--font-size-h1)',
-            fontWeight: 'var(--font-weight-black)',
-            color: 'var(--color-black)',
-            lineHeight: '1.2',
-            marginBottom: '1.5rem'
-          }}>
-            🏠 Shelter of Praise
-          </h1>
-          <p style={{
-            fontSize: 'var(--font-size-p)',
-            fontWeight: 'var(--font-weight-regular)',
-            color: 'var(--color-black-60)',
-            lineHeight: '1.6',
-            maxWidth: '600px', 
-            margin: '0 auto'
-          }}>
-            A community where faith grows, families are strengthened, and lives are transformed through God's love.
+    <div className="home-page">
+      <div className="home-container">
+
+        {/* ── Hero ── */}
+        <div className="home-hero">
+          <h1>Shelter of Praise</h1>
+          <p>
+            A community where faith grows, families are strengthened, and lives are
+            transformed through God's love.
           </p>
         </div>
 
-        {/* Purpose - Fade in from left */}
-        <div 
+        {/* ── Purpose ── */}
+        <div
           data-section="purpose"
-          style={{
-            background: 'var(--bg-main-box)',
-            padding: '3rem',
-            borderRadius: '0.75rem',
-            boxShadow: 'var(--box-shadow)',
-            marginBottom: '3rem',
-            transform: isVisible.purpose ? 'translateX(0)' : 'translateX(-50px)',
-            opacity: isVisible.purpose ? 1 : 0,
-            transition: 'all 1s ease-out',
-            borderLeft: '6px solid var(--color-black-90)'
-          }}
+          className={`home-section home-section--purpose from-left${visible.purpose ? ' visible' : ''}`}
         >
-          <h2 style={{
-            fontSize: 'var(--font-size-h2)',
-            fontWeight: 'var(--font-weight-bold)',
-            color: 'var(--color-black)',
-            lineHeight: '1.3',
-            marginBottom: '2rem',
-            textAlign: 'center'
-          }}>
-            🎯 Purpose
-          </h2>
-          <h3 style={{
-            fontSize: 'var(--font-size-h3)',
-            fontWeight: 'var(--font-weight-medium)',
-            color: 'var(--color-black)',
-            lineHeight: '1.4',
-            marginBottom: '1rem',
-            textAlign: 'center'
-          }}>
-            Love God, Love People
-          </h3>
-          <p style={{
-            fontSize: 'var(--font-size-p)',
-            fontWeight: 'var(--font-weight-regular)',
-            color: 'var(--color-black-80)',
-            lineHeight: '1.6',
-            textAlign: 'center'
-          }}>
-            Our purpose is simple yet profound: to love God with all our hearts and extend that love to every person we encounter. We believe that genuine love for God naturally overflows into compassionate service to our community, creating bonds that transform lives and strengthen our faith together.
+          <div className="section-icon-header">
+            <Target size={22} />
+            <h2>Purpose</h2>
+          </div>
+          <h3>Love God, Love People</h3>
+          <p>
+            Our purpose is simple yet profound: to love God with all our hearts and extend that
+            love to every person we encounter. We believe genuine love for God naturally overflows
+            into compassionate service to our community, creating bonds that transform lives and
+            strengthen our faith together.
           </p>
         </div>
 
-        {/* Vision - Fade in from right */}
-        <div 
+        {/* ── Vision ── */}
+        <div
           data-section="vision"
-          style={{
-            background: 'var(--bg-main-box)',
-            padding: '3rem',
-            borderRadius: '0.75rem',
-            boxShadow: 'var(--box-shadow)',
-            marginBottom: '3rem',
-            transform: isVisible.vision ? 'translateX(0)' : 'translateX(50px)',
-            opacity: isVisible.vision ? 1 : 0,
-            transition: 'all 1s ease-out 0.3s',
-            borderRight: '6px solid var(--color-black-80)'
-          }}
+          className={`home-section home-section--vision from-right${visible.vision ? ' visible' : ''}`}
+          style={{ transitionDelay: '0.15s' }}
         >
-          <h2 style={{
-            fontSize: 'var(--font-size-h2)',
-            fontWeight: 'var(--font-weight-bold)',
-            color: 'var(--color-black)',
-            lineHeight: '1.3',
-            marginBottom: '2rem',
-            textAlign: 'center'
-          }}>
-            👁️ Vision
-          </h2>
-          <h3 style={{
-            fontSize: 'var(--font-size-h3)',
-            fontWeight: 'var(--font-weight-medium)',
-            color: 'var(--color-black)',
-            lineHeight: '1.4',
-            marginBottom: '1rem',
-            textAlign: 'center'
-          }}>
-            Go & Make Disciples
-          </h3>
-          <p style={{
-            fontSize: 'var(--font-size-p)',
-            fontWeight: 'var(--font-weight-regular)',
-            color: 'var(--color-black-80)',
-            lineHeight: '1.6',
-            textAlign: 'center'
-          }}>
-            We envision a church that actively goes beyond its walls to make disciples of all nations. Our vision is to equip every believer with the tools and confidence to share the Gospel, mentor others in faith, and create a ripple effect of spiritual transformation throughout our community and beyond.
+          <div className="section-icon-header">
+            <Eye size={22} />
+            <h2>Vision</h2>
+          </div>
+          <h3>Go &amp; Make Disciples</h3>
+          <p>
+            We envision a church that actively goes beyond its walls to make disciples of all
+            nations. Our vision is to equip every believer with the tools and confidence to share
+            the Gospel, mentor others in faith, and create a ripple effect of spiritual
+            transformation throughout our community and beyond.
           </p>
         </div>
 
-        {/* Goal - Slide from bottom */}
-        <div 
+        {/* ── Goal ── */}
+        <div
           data-section="goal"
-          style={{
-            background: 'var(--bg-main-box)',
-            padding: '3rem',
-            borderRadius: '0.75rem',
-            boxShadow: 'var(--box-shadow)',
-            marginBottom: '3rem',
-            transform: isVisible.goal ? 'translateY(0)' : 'translateY(50px)',
-            opacity: isVisible.goal ? 1 : 0,
-            transition: 'all 1s ease-out 0.5s',
-            borderBottom: '6px solid var(--color-black-60)'
-          }}
+          className={`home-section home-section--goal from-bottom${visible.goal ? ' visible' : ''}`}
+          style={{ transitionDelay: '0.3s' }}
         >
-          <h2 style={{
-            fontSize: 'var(--font-size-h2)',
-            fontWeight: 'var(--font-weight-bold)',
-            color: 'var(--color-black)',
-            lineHeight: '1.3',
-            marginBottom: '2rem',
-            textAlign: 'center'
-          }}>
-            🎖️ Goal
-          </h2>
-          <h3 style={{
-            fontSize: 'var(--font-size-h3)',
-            fontWeight: 'var(--font-weight-medium)',
-            color: 'var(--color-black)',
-            lineHeight: '1.4',
-            marginBottom: '1rem',
-            textAlign: 'center'
-          }}>
-            To Make Every Believer a Leader of Leaders
-          </h3>
-          <p style={{
-            fontSize: 'var(--font-size-p)',
-            fontWeight: 'var(--font-weight-regular)',
-            color: 'var(--color-black-80)',
-            lineHeight: '1.6',
-            textAlign: 'center'
-          }}>
-            Our goal is to nurture and develop every member of our congregation into confident leaders who can mentor and guide others. We believe that true growth happens when believers don't just follow, but become equipped to lead others in their faith journey, multiplying our impact exponentially.
+          <div className="section-icon-header">
+            <Medal size={22} />
+            <h2>Goal</h2>
+          </div>
+          <h3>To Make Every Believer a Leader of Leaders</h3>
+          <p>
+            Our goal is to nurture and develop every member of our congregation into confident
+            leaders who can mentor and guide others. We believe true growth happens when believers
+            don't just follow, but become equipped to lead others in their faith journey,
+            multiplying our impact exponentially.
           </p>
         </div>
 
-        {/* Strategy - Fade In */}
-        <div 
+        {/* ── Strategy ── */}
+        <div
           data-section="strategy"
-          style={{
-            background: 'var(--bg-main-box)',
-            padding: '3rem',
-            borderRadius: '0.75rem',
-            boxShadow: 'var(--box-shadow)',
-            marginBottom: '3rem',
-            transform: isVisible.strategy ? 'scale(1)' : 'scale(0.95)',
-            opacity: isVisible.strategy ? 1 : 0,
-            transition: 'all 1s ease-out 0.7s',
-            border: '6px solid var(--color-black-40)'
-          }}
+          className={`home-section home-section--strategy from-scale${visible.strategy ? ' visible' : ''}`}
+          style={{ transitionDelay: '0.45s' }}
         >
-          <h2 style={{
-            fontSize: 'var(--font-size-h2)',
-            fontWeight: 'var(--font-weight-bold)',
-            color: 'var(--color-black)',
-            lineHeight: '1.3',
-            marginBottom: '2rem',
-            textAlign: 'center'
-          }}>
-            📋 Strategy
-          </h2>
-          <h3 style={{
-            fontSize: 'var(--font-size-h3)',
-            fontWeight: 'var(--font-weight-medium)',
-            color: 'var(--color-black)',
-            lineHeight: '1.4',
-            marginBottom: '2rem',
-            textAlign: 'center'
-          }}>
-            Win | Consolidate | Disciple | Send
-          </h3>
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', 
-            gap: '1.5rem' 
-          }}>
-            <div style={{ 
-              background: 'var(--bg-main)', 
-              padding: '1.5rem', 
-              borderRadius: '0.75rem',
-              boxShadow: 'var(--box-shadow)',
-              textAlign: 'center'
-            }}>
-              <h4 style={{
-                fontSize: 'var(--font-size-h4)',
-                fontWeight: 'var(--font-weight-regular)',
-                color: 'var(--color-black)',
-                lineHeight: '1.4',
-                marginBottom: '0.75rem'
-              }}>Win</h4>
-              <p style={{
-                fontSize: 'var(--font-size-p)',
-                fontWeight: 'var(--font-weight-regular)',
-                color: 'var(--color-black-60)',
-                lineHeight: '1.6'
-              }}>
-                Reaching souls through evangelism and community outreach programs.
-              </p>
-            </div>
-            <div style={{ 
-              background: 'var(--bg-main)', 
-              padding: '1.5rem', 
-              borderRadius: '0.75rem',
-              boxShadow: 'var(--box-shadow)',
-              textAlign: 'center'
-            }}>
-              <h4 style={{
-                fontSize: 'var(--font-size-h4)',
-                fontWeight: 'var(--font-weight-regular)',
-                color: 'var(--color-black)',
-                lineHeight: '1.4',
-                marginBottom: '0.75rem'
-              }}>Consolidate</h4>
-              <p style={{
-                fontSize: 'var(--font-size-p)',
-                fontWeight: 'var(--font-weight-regular)',
-                color: 'var(--color-black-60)',
-                lineHeight: '1.6'
-              }}>
-                Strengthening new believers through fellowship and biblical foundation.
-              </p>
-            </div>
-            <div style={{ 
-              background: 'var(--bg-main)', 
-              padding: '1.5rem', 
-              borderRadius: '0.75rem',
-              boxShadow: 'var(--box-shadow)',
-              textAlign: 'center'
-            }}>
-              <h4 style={{
-                fontSize: 'var(--font-size-h4)',
-                fontWeight: 'var(--font-weight-regular)',
-                color: 'var(--color-black)',
-                lineHeight: '1.4',
-                marginBottom: '0.75rem'
-              }}>Disciple</h4>
-              <p style={{
-                fontSize: 'var(--font-size-p)',
-                fontWeight: 'var(--font-weight-regular)',
-                color: 'var(--color-black-60)',
-                lineHeight: '1.6'
-              }}>
-                Training believers to grow in faith and spiritual maturity.
-              </p>
-            </div>
-            <div style={{ 
-              background: 'var(--bg-main)', 
-              padding: '1.5rem', 
-              borderRadius: '0.75rem',
-              boxShadow: 'var(--box-shadow)',
-              textAlign: 'center'
-            }}>
-              <h4 style={{
-                fontSize: 'var(--font-size-h4)',
-                fontWeight: 'var(--font-weight-regular)',
-                color: 'var(--color-black)',
-                lineHeight: '1.4',
-                marginBottom: '0.75rem'
-              }}>Send</h4>
-              <p style={{
-                fontSize: 'var(--font-size-p)',
-                fontWeight: 'var(--font-weight-regular)',
-                color: 'var(--color-black-60)',
-                lineHeight: '1.6'
-              }}>
-                Commissioning mature believers to lead and minister to others.
-              </p>
-            </div>
+          <div className="section-icon-header">
+            <ClipboardList size={22} />
+            <h2>Strategy</h2>
+          </div>
+          <h3>Win · Consolidate · Disciple · Send</h3>
+          <div className="strategy-grid">
+            {[
+              { label: 'Win',         desc: 'Reaching souls through evangelism and community outreach programs.' },
+              { label: 'Consolidate', desc: 'Strengthening new believers through fellowship and biblical foundation.' },
+              { label: 'Disciple',    desc: 'Training believers to grow in faith and spiritual maturity.' },
+              { label: 'Send',        desc: 'Commissioning mature believers to lead and minister to others.' },
+            ].map(({ label, desc }) => (
+              <div key={label} className="strategy-card">
+                <h4>{label}</h4>
+                <p>{desc}</p>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Hook Contents - Welcome */}
-        <div 
+        {/* ── Welcome Hook ── */}
+        <div
           data-section="hook"
-          style={{
-            marginBottom: '3rem',
-            transform: isVisible.hook ? 'translateY(0)' : 'translateY(50px)',
-            opacity: isVisible.hook ? 1 : 0,
-            transition: 'all 1s ease-out 0.9s',
-            background: 'var(--color-black-90)',
-            color: 'var(--color-white)',
-            padding: '3rem',
-            borderRadius: '0.75rem',
-            textAlign: 'center',
-            boxShadow: 'var(--box-shadow)'
-          }}
+          className={`home-hook${visible.hook ? ' visible' : ''}`}
+          style={{ transitionDelay: '0.6s' }}
         >
-          <h2 style={{
-            fontSize: 'var(--font-size-h2)',
-            fontWeight: 'var(--font-weight-bold)',
-            color: 'var(--color-white)',
-            lineHeight: '1.3',
-            marginBottom: '1.5rem'
-          }}>
-            🤗 Welcome to Our Family
-          </h2>
-          <p style={{
-            fontSize: 'var(--font-size-p)',
-            fontWeight: 'var(--font-weight-regular)',
-            color: 'var(--color-white)',
-            lineHeight: '1.6',
-            marginBottom: '2rem',
-            maxWidth: '800px',
-            margin: '0 auto 2rem auto'
-          }}>
-            Whether you're seeking spiritual guidance, community fellowship, or simply a place to call home, 
-            you'll find open arms and warm hearts here. Come as you are, and discover the transforming power 
-            of God's love in your life.
+          <div className="section-icon-header" style={{ justifyContent: 'center' }}>
+            <HandHeart size={24} color="#fff" />
+            <h2>Welcome to Our Family</h2>
+          </div>
+          <p>
+            Whether you're seeking spiritual guidance, community fellowship, or simply a place to
+            call home, you'll find open arms and warm hearts here. Come as you are, and discover
+            the transforming power of God's love in your life.
           </p>
-          <button style={{
-            background: 'var(--color-white)',
-            color: 'var(--color-black-90)',
-            fontWeight: 'var(--font-weight-bold)',
-            padding: '0.75rem 1.5rem',
-            borderRadius: '0.5rem',
-            border: 'none',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            fontSize: 'var(--font-size-p)'
-          }}>
+          <button className="home-hook-btn">
+            <Users size={16} />
             Join Us This Sunday
           </button>
         </div>
 
-        {/* Full-screen Video Background */}
-        <div 
+        {/* ── Video Carousel ── */}
+        <div
           data-section="video"
-          style={{
-            marginBottom: '3rem',
-            transform: isVisible.video ? 'scale(1)' : 'scale(0.95)',
-            opacity: isVisible.video ? 1 : 0,
-            transition: 'all 1s ease-out 1.1s',
-            position: 'relative',
-            height: '70vh',
-            borderRadius: '0.75rem',
-            overflow: 'hidden',
-            boxShadow: 'var(--box-shadow)'
-          }}
+          className={`video-carousel-wrap${visible.video ? ' visible' : ''}`}
+          style={{ transitionDelay: '0.75s' }}
         >
-          <img 
-            src={videos[currentVideoIndex].thumbnail}
-            alt={videos[currentVideoIndex].title}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              transition: 'all 1s ease'
-            }}
-          />
-          <div style={{
-            position: 'absolute',
-            inset: 0,
-            background: 'linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6))',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'var(--color-white)',
-            textAlign: 'center',
-            padding: '2rem'
-          }}>
-            {/*
-            <button style={{
-              background: 'rgba(255, 255, 255, 0.9)',
-              borderRadius: '50%',
-              padding: '1.5rem',
-              border: 'none',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              fontSize: '2rem',
-              marginBottom: '1rem',
-              boxShadow: 'var(--box-shadow)'
-            }}>
-              ▶️
-            </button>
-            */}
-            <div className="bg-white/25 rounded-full p-6 group-hover:scale-110 transition-transform duration-300"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-play text-black ml-1" aria-hidden="true"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"></path></svg></div>
-            <h3 style={{
-              fontSize: 'var(--font-size-h3)',
-              fontWeight: 'var(--font-weight-medium)',
-              color: 'var(--color-white)',
-              lineHeight: '1.4',
-              margin: 0
-            }}>
-              {videos[currentVideoIndex].title}
-            </h3>
+          {/* YouTube player target */}
+          <div id={playerDivId} className={`video-carousel-frame${overlayHidden ? ' user-active' : ''}`} />
+
+          {/* Progress bar */}
+          {!overlayHidden && (
+            <div className="carousel-progress-bar" ref={progressBarRef} />
+          )}
+
+          {/* Overlay — hidden after user clicks play */}
+          <div className={`video-carousel-overlay${overlayHidden ? ' hidden' : ''}`}>
+            <div
+              className="carousel-play-ring"
+              onClick={handleUserPlay}
+              role="button"
+              aria-label="Play video"
+            >
+              <Play size={28} color="#fff" style={{ marginLeft: 3 }} />
+            </div>
+            <p className="carousel-title">{videos[activeIdx].title}</p>
+            <p className="carousel-subtitle">{videos[activeIdx].subtitle}</p>
+            <div className="carousel-dots">
+              {videos.map((_, i) => (
+                <button
+                  key={i}
+                  className={`carousel-dot${activeIdx === i ? ' active' : ''}`}
+                  onClick={() => handleDotClick(i)}
+                  aria-label={`Go to video ${i + 1}`}
+                />
+              ))}
+            </div>
           </div>
+
+          {/* Minimal controls shown once user has engaged */}
+          {overlayHidden && (
+            <div
+              style={{
+                position: 'absolute', bottom: '1rem', right: '1rem', zIndex: 3,
+                display: 'flex', gap: '0.5rem', alignItems: 'center'
+              }}
+            >
+              <button
+                onClick={handleTogglePlay}
+                style={{
+                  background: 'rgba(0,0,0,0.5)', border: 'none', borderRadius: '50%',
+                  width: 40, height: 40, display: 'flex', alignItems: 'center',
+                  justifyContent: 'center', cursor: 'pointer', color: '#fff'
+                }}
+                aria-label={isPlaying ? 'Pause' : 'Play'}
+              >
+                {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+              </button>
+              <div className="carousel-dots" style={{ marginBottom: 0 }}>
+                {videos.map((_, i) => (
+                  <button
+                    key={i}
+                    className={`carousel-dot${activeIdx === i ? ' active' : ''}`}
+                    onClick={() => handleDotClick(i)}
+                    aria-label={`Go to video ${i + 1}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Latest Sermon */}
-        <div 
+        {/* ── Latest Sermon ── */}
+        <div
           data-section="sermon"
-          style={{
-            background: 'var(--bg-main-box)',
-            padding: '3rem',
-            borderRadius: '0.75rem',
-            boxShadow: 'var(--box-shadow)',
-            transform: isVisible.sermon ? 'translateY(0)' : 'translateY(50px)',
-            opacity: isVisible.sermon ? 1 : 0,
-            transition: 'all 1s ease-out 1.3s',
-            borderTop: '6px solid var(--color-black-20)'
-          }}
+          className={`home-section home-section--sermon from-bottom${visible.sermon ? ' visible' : ''}`}
+          style={{ transitionDelay: '0.9s' }}
         >
-          <h2 style={{
-            fontSize: 'var(--font-size-h2)',
-            fontWeight: 'var(--font-weight-bold)',
-            color: 'var(--color-black)',
-            lineHeight: '1.3',
-            marginBottom: '2rem',
-            textAlign: 'center'
-          }}>
-            📖 Latest Sermon
-          </h2>
-          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <div style={{
-              background: 'var(--bg-main)',
-              borderRadius: '0.75rem',
-              boxShadow: 'var(--box-shadow)',
-              padding: '2rem'
-            }}>
-              <h3 style={{
-                fontSize: 'var(--font-size-h3)',
-                fontWeight: 'var(--font-weight-medium)',
-                color: 'var(--color-black)',
-                lineHeight: '1.4',
-                marginBottom: '1rem'
-              }}>
-                "Walking by Faith, Not by Sight"
-              </h3>
-              <p style={{
-                fontSize: 'var(--font-size-span)',
-                fontWeight: 'var(--font-weight-regular)',
-                color: 'var(--color-black-60)',
-                marginBottom: '1rem'
-              }}>
-                Pastor John Smith • Sunday, August 11, 2025
-              </p>
-              <p style={{
-                fontSize: 'var(--font-size-p)',
-                fontWeight: 'var(--font-weight-regular)',
-                color: 'var(--color-black-80)',
-                lineHeight: '1.6',
-                marginBottom: '1.5rem'
-              }}>
-                Discover how to trust God's plan even when the path ahead seems uncertain. 
+          <div className="section-icon-header">
+            <BookOpen size={22} />
+            <h2>Latest Sermon</h2>
+          </div>
+          <div className="sermon-inner">
+            <div className="sermon-card">
+              <h3>"Walking by Faith, Not by Sight"</h3>
+              <p className="sermon-meta">Pastor John Smith &nbsp;·&nbsp; Sunday, August 11, 2025</p>
+              <p>
+                Discover how to trust God's plan even when the path ahead seems uncertain.
                 Learn practical ways to strengthen your faith and find peace in God's promises.
               </p>
-              <div style={{ 
-                display: 'flex', 
-                flexWrap: 'wrap',
-                gap: '1rem' 
-              }}>
-                <button style={{
-                  background: 'var(--color-black-90)',
-                  color: 'var(--color-white)',
-                  fontWeight: 'var(--font-weight-bold)',
-                  padding: '0.75rem 1.5rem',
-                  borderRadius: '0.5rem',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}>
-                  Watch Sermon
+              <div className="sermon-actions">
+                <button className="sermon-btn sermon-btn--primary">
+                  <Play size={15} /> Watch Sermon
                 </button>
-                <button style={{
-                  background: 'var(--color-black-20)',
-                  color: 'var(--color-black-90)',
-                  fontWeight: 'var(--font-weight-bold)',
-                  padding: '0.75rem 1.5rem',
-                  borderRadius: '0.5rem',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}>
-                  Download Audio
+                <button className="sermon-btn sermon-btn--secondary">
+                  <Download size={15} /> Download Audio
                 </button>
-                <button style={{
-                  background: 'var(--color-black-20)',
-                  color: 'var(--color-black-90)',
-                  fontWeight: 'var(--font-weight-bold)',
-                  padding: '0.75rem 1.5rem',
-                  borderRadius: '0.5rem',
-                  border: 'none',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}>
-                  Read Notes
+                <button className="sermon-btn sermon-btn--secondary">
+                  <FileText size={15} /> Read Notes
                 </button>
               </div>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );

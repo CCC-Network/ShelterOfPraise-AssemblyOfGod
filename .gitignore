@@ -10,6 +10,14 @@ lerna-debug.log*
 node_modules
 dist
 backup/
+test/
+task/
+temp/service/
+temp/sql/
+vite.config.ts.timestamp-1773490748947-71e2d0fd0f4358.mjs
+error/
+supabase/
+__docs__/
 dist-ssr
 *.local
 
@@ -17,6 +25,8 @@ dist-ssr
 .vscode/*
 !.vscode/extensions.json
 .idea
+.md
+.env
 .DS_Store
 *.suo
 *.ntvs*
