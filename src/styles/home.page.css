@@ -1,0 +1,398 @@
+/* =============================================
+   HomePage — home.css
+   ============================================= */
+
+/* ---------- Page Shell ---------- */
+.home-page {
+  min-height: 100vh;
+  background: var(--bg-main);
+  overflow-x: hidden;
+}
+
+.home-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 5rem 1.25rem 4rem;
+}
+
+/* ---------- Hero ---------- */
+.home-hero {
+  text-align: center;
+  margin-bottom: 5rem;
+}
+
+.home-hero h1 {
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-black);
+  color: var(--color-black);
+  line-height: 1.15;
+  margin: 0 0 1.25rem;
+}
+
+.home-hero p {
+  font-size: var(--font-size-p);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-black-60);
+  line-height: 1.65;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+/* ---------- Scroll-animated sections ---------- */
+.home-section {
+  background: var(--bg-main-box);
+  padding: 3rem;
+  border-radius: 0.75rem;
+  box-shadow: var(--box-shadow);
+  margin-bottom: 3rem;
+  /* default hidden state — JS toggles .visible */
+  opacity: 0;
+  transition: opacity 1s ease-out, transform 1s ease-out;
+}
+
+/* Named entry directions */
+.home-section.from-left  { transform: translateX(-50px); }
+.home-section.from-right { transform: translateX(50px);  }
+.home-section.from-bottom{ transform: translateY(50px);  }
+.home-section.from-scale { transform: scale(0.95);       }
+
+.home-section.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Accent borders */
+.home-section--purpose  { border-left:   5px solid var(--color-black-90); }
+.home-section--vision   { border-right:  5px solid var(--color-black-80); }
+.home-section--goal     { border-bottom: 5px solid var(--color-black-60); }
+.home-section--strategy { border:        5px solid var(--color-black-40); }
+.home-section--sermon   { border-top:    5px solid var(--color-black-20); }
+
+/* ---------- Section typography ---------- */
+.home-section h2 {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-black);
+  line-height: 1.3;
+  margin: 0 0 1.5rem;
+  text-align: center;
+}
+
+.home-section h3 {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-black);
+  line-height: 1.4;
+  margin: 0 0 1rem;
+  text-align: center;
+}
+
+.home-section p {
+  font-size: var(--font-size-p);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-black-80);
+  line-height: 1.65;
+  text-align: center;
+  margin: 0;
+}
+
+/* ---------- Section icon header ---------- */
+.section-icon-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+.section-icon-header svg { color: var(--color-black-80); }
+
+/* ---------- Strategy grid ---------- */
+.strategy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.strategy-card {
+  background: var(--bg-main);
+  padding: 1.5rem 1.25rem;
+  border-radius: 0.6rem;
+  box-shadow: var(--box-shadow);
+  text-align: center;
+  border-top: 3px solid var(--color-black-20);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.strategy-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+}
+
+.strategy-card h4 {
+  font-size: var(--font-size-h4, 1rem);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-black);
+  margin: 0 0 0.6rem;
+  line-height: 1.3;
+}
+
+.strategy-card p {
+  font-size: var(--font-size-p);
+  color: var(--color-black-60);
+  line-height: 1.55;
+  margin: 0;
+  text-align: center;
+}
+
+/* ---------- Hook / Welcome Banner ---------- */
+.home-hook {
+  background: var(--color-black-90);
+  color: var(--color-white);
+  padding: 3.5rem 3rem;
+  border-radius: 0.75rem;
+  text-align: center;
+  box-shadow: var(--box-shadow);
+  margin-bottom: 3rem;
+  opacity: 0;
+  transform: translateY(50px);
+  transition: opacity 1s ease-out, transform 1s ease-out;
+}
+.home-hook.visible {
+  opacity: 1;
+  transform: none;
+}
+
+.home-hook h2 {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-white);
+  line-height: 1.3;
+  margin: 0 0 1.25rem;
+}
+
+.home-hook p {
+  font-size: var(--font-size-p);
+  color: var(--color-white);
+  line-height: 1.65;
+  max-width: 760px;
+  margin: 0 auto 2rem;
+  opacity: 0.9;
+}
+
+.home-hook-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--color-white);
+  color: var(--color-black-90);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-p);
+  padding: 0.8rem 1.75rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.home-hook-btn:hover {
+  opacity: 0.88;
+  transform: scale(1.03);
+}
+
+/* ---------- Video Carousel ---------- */
+.video-carousel-wrap {
+  position: relative;
+  margin-bottom: 3rem;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  height: 68vh;
+  min-height: 380px;
+  box-shadow: var(--box-shadow);
+  background: #000;
+  opacity: 0;
+  transform: scale(0.96);
+  transition: opacity 1s ease-out, transform 1s ease-out;
+}
+.video-carousel-wrap.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* The YouTube iframe lives here — full-cover */
+.video-carousel-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  /* YouTube controls visible only when user-engaged */
+  pointer-events: none;
+}
+.video-carousel-frame.user-active {
+  pointer-events: all;
+}
+
+/* Dark gradient overlay — fades out when user-active */
+.video-carousel-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.65) 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  text-align: center;
+  padding: 2rem;
+  transition: opacity 0.5s;
+  z-index: 2;
+}
+.video-carousel-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.carousel-play-ring {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.18);
+  border: 2px solid rgba(255,255,255,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  backdrop-filter: blur(4px);
+}
+.carousel-play-ring:hover {
+  background: rgba(255,255,255,0.3);
+  transform: scale(1.1);
+}
+
+.carousel-title {
+  font-size: var(--font-size-h3, 1.25rem);
+  font-weight: var(--font-weight-medium);
+  color: #fff;
+  margin: 0 0 0.5rem;
+}
+.carousel-subtitle {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.7);
+  margin: 0 0 1.5rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Dot + progress indicators */
+.carousel-dots {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.carousel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.4);
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s, transform 0.2s;
+}
+.carousel-dot.active {
+  background: #fff;
+  transform: scale(1.35);
+}
+
+/* Progress bar */
+.carousel-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: rgba(255,255,255,0.85);
+  z-index: 3;
+  transform-origin: left;
+  transition: none; /* driven by JS animation */
+}
+
+/* ---------- Sermon Section ---------- */
+.sermon-inner {
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+.sermon-card {
+  background: var(--bg-main);
+  border-radius: 0.75rem;
+  box-shadow: var(--box-shadow);
+  padding: 2rem;
+}
+
+.sermon-card h3 {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-black);
+  line-height: 1.4;
+  margin: 0 0 0.6rem;
+  text-align: left;
+}
+
+.sermon-meta {
+  font-size: var(--font-size-span, 0.85rem);
+  color: var(--color-black-60);
+  margin: 0 0 1rem;
+}
+
+.sermon-card p {
+  font-size: var(--font-size-p);
+  color: var(--color-black-80);
+  line-height: 1.65;
+  margin: 0 0 1.5rem;
+  text-align: left;
+}
+
+.sermon-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.sermon-btn {
+  padding: 0.7rem 1.35rem;
+  border-radius: 0.5rem;
+  border: none;
+  font-weight: var(--font-weight-bold);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.sermon-btn:hover { opacity: 0.82; transform: scale(1.02); }
+
+.sermon-btn--primary {
+  background: var(--color-black-90);
+  color: var(--color-white);
+}
+.sermon-btn--secondary {
+  background: var(--color-black-20);
+  color: var(--color-black-90);
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .home-container { padding: 3rem 0.85rem 3rem; }
+  .home-section   { padding: 2rem 1.25rem; }
+  .home-hook      { padding: 2.5rem 1.25rem; }
+  .strategy-grid  { grid-template-columns: 1fr 1fr; }
+  .video-carousel-wrap { height: 52vw; min-height: 260px; }
+}
+
+@media (max-width: 480px) {
+  .strategy-grid { grid-template-columns: 1fr; }
+  .home-hero h1  { font-size: clamp(1.6rem, 6vw, 2.4rem); }
+  .sermon-card h3 { font-size: 1.05rem; }
+}

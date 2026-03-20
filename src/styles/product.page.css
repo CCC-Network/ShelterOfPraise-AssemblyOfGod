@@ -1,0 +1,925 @@
+/* =============================================
+   product.css — Shelter of Praise
+   Follows the same theme system as projects.css
+   ============================================= */
+
+/* ---------- Page Shell ---------- */
+.sop-page {
+  min-height: 100vh;
+  background: var(--bg-main);
+  color: var(--color-black);
+}
+
+.sop-header {
+  border-bottom: 1px solid var(--color-black-20);
+  padding: 2rem 1rem 1.5rem;
+  text-align: center;
+  background: var(--bg-main);
+}
+.sop-title {
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-weight: 700;
+  color: var(--color-black);
+  letter-spacing: -0.3px;
+  margin: 0 0 0.2rem;
+}
+.sop-subtitle {
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--color-black-40);
+  margin: 0 0 0.5rem;
+}
+.sop-tagline {
+  font-size: 0.85rem;
+  color: var(--color-black-60);
+  font-style: italic;
+  margin: 0;
+}
+
+.sop-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.75rem 1rem 4rem;
+}
+
+.fade-in {
+  animation: fadeIn 0.28s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Section Hero ---------- */
+.section-hero {
+  text-align: center;
+  padding: 0.25rem 0 1.75rem;
+}
+.section-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 0.625rem;
+  background: var(--bg-secondary, rgba(0,0,0,0.04));
+  border: 1px solid var(--color-black-20);
+  color: var(--color-black-60);
+  margin-bottom: 0.75rem;
+}
+.section-title {
+  font-size: clamp(1.1rem, 3vw, 1.55rem);
+  font-weight: 700;
+  color: rgba(0,0,0,0.795);
+  margin: 0 0 0.45rem;
+}
+.section-sub {
+  max-width: 500px;
+  margin: 0 auto;
+  color: var(--color-black-60);
+  line-height: 1.65;
+  font-size: 0.875rem;
+}
+
+/* ==============================================
+   MERCHANDISE — Shopee-style tile grid
+   ============================================== */
+
+/* ── Filter bar ── */
+.merch-filter-bar {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.875rem;
+}
+.merch-filter-btn {
+  padding: 0.35rem 0.9rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-black-20);
+  background: transparent;
+  color: var(--color-black-60);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.merch-filter-btn:hover {
+  border-color: var(--color-black-40);
+  color: var(--color-black);
+}
+.merch-filter-active {
+  background: var(--bg-main-box);
+  border-color: var(--bg-main-box);
+  color: var(--color-white);
+}
+
+.merch-results-count {
+  font-size: 0.8rem;
+  color: var(--color-black-40);
+  margin: 0 0 1rem;
+}
+
+/* ── Tile grid ── */
+.merch-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 0.875rem;
+}
+
+/* ── Individual tile ── */
+.merch-tile {
+  background: var(--bg-main);
+  border: 1px solid var(--color-black-20);
+  border-radius: 0.625rem;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+  display: flex;
+  flex-direction: column;
+}
+.merch-tile:hover {
+  border-color: var(--color-black-40);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+/* Visual area */
+.merch-tile-visual {
+  position: relative;
+  height: 160px;
+  background: var(--bg-secondary, rgba(0,0,0,0.03));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--color-black-20);
+  overflow: hidden;
+}
+.merch-tile-icon {
+  color: var(--color-black-40);
+  transition: transform 0.25s, color 0.25s;
+}
+.merch-tile:hover .merch-tile-icon {
+  transform: scale(1.08);
+  color: var(--color-black-60);
+}
+
+/* Hover overlay */
+.merch-tile-hover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 0.75rem;
+  transition: background 0.2s;
+}
+.merch-tile:hover .merch-tile-hover-overlay {
+  background: rgba(0,0,0,0.18);
+}
+.merch-tile-view-label {
+  background: var(--bg-main-box);
+  color: var(--color-white);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.3rem 0.9rem;
+  border-radius: 9999px;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.merch-tile:hover .merch-tile-view-label {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Badges */
+.merch-tile-badge {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 0.18rem 0.5rem;
+  border-radius: 9999px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.merch-tile-discount {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 0.18rem 0.45rem;
+  border-radius: 0.3rem;
+}
+
+/* Info area */
+.merch-tile-body {
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+.merch-tile-category {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: var(--color-black-40);
+  margin: 0;
+}
+.merch-tile-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-black);
+  line-height: 1.35;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.merch-tile-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.25rem;
+}
+.merch-tile-prices {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+.merch-tile-price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-black);
+}
+.merch-tile-original {
+  font-size: 0.7rem;
+  color: var(--color-black-40);
+  text-decoration: line-through;
+}
+.merch-tile-sold {
+  font-size: 0.68rem;
+  color: var(--color-black-40);
+}
+
+/* Swatch preview dots */
+.merch-tile-swatches {
+  display: flex;
+  gap: 0.3rem;
+  margin-top: 0.2rem;
+}
+.tile-swatch-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,0.12);
+  display: inline-block;
+}
+
+/* ── Star rating ── */
+.star-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.star-filled {
+  color: #f59e0b;
+  fill: #f59e0b;
+}
+.star-empty {
+  color: var(--color-black-20);
+  fill: var(--color-black-20);
+}
+.star-value {
+  font-size: 0.7rem;
+  color: var(--color-black-40);
+  margin-left: 3px;
+}
+
+/* ==============================================
+   PRODUCT POPUP
+   ============================================== */
+.popup-modal-wrap {
+  position: fixed;
+  inset: 1rem;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+@media (min-width: 1024px) {
+  .popup-modal-wrap { inset: 4rem; }
+}
+
+.popup-modal {
+  background: var(--bg-main);
+  border-radius: 0.875rem;
+  width: 100%;
+  max-width: 780px;
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.18);
+}
+
+.popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem 0;
+}
+.popup-category-chip {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--color-black-40);
+}
+
+.popup-body {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 0;
+}
+@media (max-width: 620px) {
+  .popup-body { grid-template-columns: 1fr; }
+}
+
+/* Visual panel */
+.popup-visual {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+  padding: 2rem 1.5rem;
+  border-right: 1px solid var(--color-black-20);
+  transition: background 0.3s;
+}
+@media (max-width: 620px) {
+  .popup-visual {
+    border-right: none;
+    border-bottom: 1px solid var(--color-black-20);
+    min-height: 200px;
+  }
+}
+
+.popup-icon {
+  transition: color 0.3s;
+  opacity: 0.8;
+}
+
+/* Info panel */
+.popup-info {
+  padding: 1.25rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+.popup-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-black);
+  line-height: 1.3;
+  margin: 0;
+}
+.popup-tagline {
+  font-size: 0.82rem;
+  color: var(--color-black-40);
+  font-style: italic;
+  margin: 0;
+}
+
+.popup-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.popup-sold {
+  font-size: 0.75rem;
+  color: var(--color-black-40);
+}
+
+.popup-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: var(--bg-secondary, rgba(0,0,0,0.03));
+  border-radius: 0.5rem;
+}
+.popup-price {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-black);
+}
+.popup-original {
+  font-size: 0.85rem;
+  color: var(--color-black-40);
+  text-decoration: line-through;
+}
+.popup-discount {
+  background: #fef2f2;
+  color: #ef4444;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 0.3rem;
+}
+
+.popup-desc {
+  font-size: 0.845rem;
+  color: var(--color-black-60);
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* Swatch section */
+.popup-swatch-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.popup-label {
+  font-size: 0.78rem;
+  color: var(--color-black-60);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.popup-swatches {
+  display: flex;
+  gap: 0.4rem;
+}
+
+/* Colour swatches (shared) */
+.swatch-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.swatch-btn:hover { transform: scale(1.15); }
+.swatch-active {
+  box-shadow: 0 0 0 2px var(--bg-main), 0 0 0 3.5px var(--color-black-60);
+}
+
+/* Quantity */
+.popup-qty-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.qty-control {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--color-black-20);
+  border-radius: 0.4rem;
+  overflow: hidden;
+}
+.qty-btn {
+  width: 30px;
+  height: 30px;
+  border: none;
+  background: var(--bg-secondary, rgba(0,0,0,0.04));
+  color: var(--color-black);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.qty-btn:hover { background: var(--color-black-20); }
+.qty-value {
+  width: 36px;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-black);
+}
+
+/* Specs table */
+.popup-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.specs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+.specs-table tr {
+  border-bottom: 1px solid var(--color-black-20);
+}
+.specs-table tr:last-child { border-bottom: none; }
+.spec-key {
+  padding: 0.4rem 0.5rem 0.4rem 0;
+  color: var(--color-black-40);
+  font-weight: 500;
+  white-space: nowrap;
+  width: 35%;
+}
+.spec-val {
+  padding: 0.4rem 0;
+  color: var(--color-black-60);
+}
+
+/* Popup CTAs */
+.popup-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+}
+
+/* ==============================================
+   POWERPOINT
+   ============================================== */
+.ppt-section { display: flex; flex-direction: column; }
+
+.ppt-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(258px, 1fr));
+  gap: 0.875rem;
+  margin-bottom: 0.875rem;
+}
+.ppt-card {
+  background: var(--bg-main);
+  border: 1px solid var(--color-black-20);
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.ppt-card:hover {
+  background: var(--bg-secondary, rgba(0,0,0,0.02));
+  border-color: var(--color-black-40);
+  transform: translateY(-2px);
+}
+.ppt-card-selected {
+  border-color: var(--bg-main-box) !important;
+  background: var(--bg-secondary, rgba(0,0,0,0.025)) !important;
+}
+.ppt-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.ppt-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 0.5rem;
+  background: var(--bg-secondary, rgba(0,0,0,0.04));
+  border: 1px solid var(--color-black-20);
+  color: var(--color-black-60);
+}
+.ppt-badge {
+  background: var(--bg-main-box);
+  color: var(--color-white);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+}
+.ppt-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-black);
+  line-height: 1.3;
+  margin: 0;
+}
+.ppt-slides {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--color-black-40);
+  margin: 0;
+}
+.ppt-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.ppt-topic {
+  background: var(--bg-secondary, rgba(0,0,0,0.04));
+  border: 1px solid var(--color-black-20);
+  color: var(--color-black-60);
+  font-size: 0.67rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+}
+.ppt-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-black-20);
+}
+.ppt-price {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-black);
+}
+.ppt-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  background: var(--bg-secondary, var(--bg-main));
+  border: 1px solid var(--color-black-20);
+  border-radius: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  margin-bottom: 0.875rem;
+}
+.ppt-action-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  color: var(--color-black);
+}
+.ppt-action-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+.ppt-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  padding-top: 0.25rem;
+}
+.info-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--bg-main);
+  border: 1px solid var(--color-black-20);
+  color: var(--color-black-60);
+  font-size: 0.75rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 9999px;
+}
+
+/* ==============================================
+   COACHING
+   ============================================== */
+.coaching-section { display: flex; flex-direction: column; }
+
+.coach-quote {
+  font-size: 1rem;
+  font-style: italic;
+  color: rgba(0,0,0,0.795);
+  text-align: center;
+  max-width: 540px;
+  margin: 0 auto 1.5rem;
+  padding: 1rem 1.25rem;
+  border-left: 3px solid var(--bg-main-box);
+  background: var(--bg-secondary, rgba(0,0,0,0.025));
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+.coach-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+.coach-chip {
+  background: var(--bg-secondary, rgba(0,0,0,0.04));
+  border: 1px solid var(--color-black-20);
+  color: var(--color-black-60);
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 0.3rem 0.85rem;
+  border-radius: 9999px;
+}
+.coach-plans {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(272px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.coach-card {
+  background: var(--bg-main);
+  border: 1px solid var(--color-black-20);
+  border-radius: 0.75rem;
+  padding: 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s;
+}
+.coach-card:hover { transform: translateY(-3px); }
+.coach-card-highlight {
+  border-color: var(--bg-main-box);
+  background: var(--bg-secondary, var(--bg-main));
+}
+.coach-ribbon {
+  position: absolute;
+  top: 14px; right: -22px;
+  background: var(--bg-main-box);
+  color: var(--color-white);
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 3px 28px;
+  transform: rotate(35deg);
+}
+.coach-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 0.625rem;
+  background: var(--bg-secondary, rgba(0,0,0,0.04));
+  border: 1px solid var(--color-black-20);
+  color: var(--color-black-60);
+}
+.coach-plan-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: rgba(0,0,0,0.795);
+  margin: 0;
+}
+.coach-plan-sub {
+  font-size: 0.8rem;
+  color: var(--color-black-60);
+  line-height: 1.5;
+  margin: 0;
+}
+.coach-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+.coach-price {
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: var(--color-black);
+}
+.coach-freq { font-size: 0.78rem; color: var(--color-black-40); }
+.coach-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+.coach-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  font-size: 0.83rem;
+  color: var(--color-black-60);
+  line-height: 1.5;
+}
+.check-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--bg-main-box);
+}
+.coach-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: auto;
+}
+.coach-process {
+  background: var(--bg-secondary, var(--bg-main));
+  border: 1px solid var(--color-black-20);
+  border-radius: 0.75rem;
+  padding: 1.75rem 1.5rem;
+}
+.process-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(0,0,0,0.795);
+  margin: 0 0 1.25rem;
+  text-align: center;
+}
+.process-steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+  gap: 1.25rem;
+}
+.process-step { display: flex; flex-direction: column; gap: 0.25rem; }
+.step-num {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--color-black-20);
+  line-height: 1;
+}
+.process-step strong { font-size: 0.875rem; color: var(--color-black); }
+.process-step p {
+  font-size: 0.8rem;
+  color: var(--color-black-60);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ==============================================
+   SHARED BUTTONS
+   ============================================== */
+.btn-primary,
+.btn-secondary,
+.btn-outline,
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.15s, background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--bg-main-box);
+  color: var(--color-white);
+  border: none;
+}
+.btn-primary:hover { opacity: 0.88; transform: scale(1.02); }
+
+.btn-secondary {
+  background: var(--bg-main-box);
+  color: var(--color-white);
+  border: none;
+  opacity: 0.7;
+}
+.btn-secondary:hover { opacity: 1; transform: scale(1.02); }
+
+.btn-outline {
+  background: transparent;
+  color: var(--color-black);
+  border: 1px solid var(--color-black-40);
+}
+.btn-outline:hover { background: rgba(0,0,0,0.04); border-color: var(--color-black); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--color-black-60);
+  border: 1px solid var(--color-black-20);
+}
+.btn-ghost:hover { background: rgba(0,0,0,0.03); color: var(--color-black); }
+
+.btn-sm  { padding: 0.38rem 0.75rem; font-size: 0.8rem; }
+.btn-full { width: 100%; justify-content: center; }
+
+/* ==============================================
+   RESPONSIVE
+   ============================================== */
+@media (max-width: 768px) {
+  .merch-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .coach-plans { grid-template-columns: 1fr; }
+  .ppt-grid { grid-template-columns: 1fr 1fr; }
+  .popup-body { grid-template-columns: 1fr; }
+  .popup-visual { border-right: none; border-bottom: 1px solid var(--color-black-20); }
+}
+
+@media (max-width: 520px) {
+  .sop-header   { padding: 1.25rem 0.75rem 1rem; }
+  .sop-content  { padding: 1rem 0.75rem 3rem; }
+  .merch-grid   { grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+  .ppt-grid     { grid-template-columns: 1fr; }
+  .merch-tile-visual { height: 130px; }
+  .ppt-action-bar { flex-direction: column; align-items: flex-start; }
+  .popup-modal-wrap { inset: 0; border-radius: 0; }
+  .popup-modal  { border-radius: 0; max-height: 100vh; }
+}

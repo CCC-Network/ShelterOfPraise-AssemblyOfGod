@@ -1,16 +1,12 @@
-import { createClient } from '@supabase/supabase-js';
+// src/pages/testimonials/testimonials.data.ts
+import { supabase } from "../lib/supabaseClient"; // ✅ correct relative path
 
-// Initialize Supabase client
-const supabaseUrl = process.env.VITE_PUBLIC_SUPABASE_URL || '';
-const supabaseKey = process.env.VITE_PUBLIC_SUPABASE_ANON_KEY || '';
-export const supabase = createClient(supabaseUrl, supabaseKey);
-
-// Type definitions
+// ── Types ─────────────────────────────────────────────────────
 export interface Testimonial {
-  id: number | string;
+  id: string;
   name: string;
-  image: string;
-  testimonial: string;
+  image: string;       // maps from profile_url
+  testimonial: string; // maps from message
   role: string;
   created_at?: string;
 }
@@ -22,173 +18,95 @@ export interface TestimonialFormData {
   image: File | string | null;
 }
 
-// Template/Metadata testimonials for frontend (always displayed)
-export const templateTestimonials: Testimonial[] = [
-  {
-    id: 1,
-    name: "John Doe",
-    image:
-      "https://images.unsplash.com/photo-1494790108755-2616b15c2fd0?w=150&h=150&fit=crop&crop=face&auto=format",
-    testimonial:
-      "This church has been a blessing to our family. The community is welcoming and the teachings are life-changing.",
-    role: "Guest",
-  },
-  {
-    id: 2,
-    name: "Kyle Doe",
-    image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face&auto=format",
-    testimonial:
-      "This church has been a blessing to our family. The community is welcoming and the teachings are life-changing.",
-    role: "Church Member Pastor",
-  },
-  {
-    id: 3,
-    name: "Sam Meltmer",
-    image:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face&auto=format",
-    testimonial:
-      "This church has been a blessing to our family. The community is welcoming and the teachings are life-changing.",
-    role: "Musician",
-  },
-  {
-    id: 4,
-    name: "Alicja Khan",
-    image:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face&auto=format",
-    testimonial:
-      "This church has been a blessing to our family. The community is welcoming and the teachings are life-changing.",
-    role: "Friend",
-  },
-];
+// ── Fallback avatar ───────────────────────────────────────────
+const FALLBACK_AVATAR =
+  "https://ui-avatars.com/api/?background=3b82f6&color=fff&size=150&name=";
 
-// Fetch testimonials from Supabase
-export const fetchTestimonials = async (): Promise<Testimonial[]> => {
-  try {
-    const { data, error } = await supabase
-      .from('testimonials')
-      .select('*')
-      .order('created_at', { ascending: false });
+// ── Fetch all testimonials ────────────────────────────────────
+export async function fetchTestimonials(): Promise<Testimonial[]> {
+  const { data, error } = await supabase
+    .from("testimonials")
+    .select("id, name, role, message, profile_url, created_at")
+    .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error('Error fetching testimonials:', error);
-      return [];
-    }
-
-    // Transform Supabase data to match frontend format
-    return (data || []).map((item: any) => ({
-      id: item.id,
-      name: item.name,
-      image: item.profile_url || 'https://via.placeholder.com/150',
-      testimonial: item.message,
-      role: item.role || 'Member',
-      created_at: item.created_at,
-    }));
-  } catch (error) {
-    console.error('Error in fetchTestimonials:', error);
+  if (error) {
+    console.error("[Testimonials] Fetch error:", error.message);
     return [];
   }
-};
 
-// Validate image size (max 500KB)
-export const validateImageSize = (file: File): boolean => {
-  const maxSize = 500 * 1024; // 500KB in bytes
-  return file.size <= maxSize;
-};
+  return (data ?? []).map((item: any) => ({
+    id: item.id,
+    name: item.name,
+    role: item.role ?? "Member",
+    testimonial: item.message,
+    image: item.profile_url || `${FALLBACK_AVATAR}${encodeURIComponent(item.name)}`,
+    created_at: item.created_at,
+  }));
+}
 
-// Upload image to Supabase Storage
-export const uploadImage = async (file: File): Promise<string | null> => {
-  try {
-    // Validate file size
-    if (!validateImageSize(file)) {
-      throw new Error('Image size must be less than 500KB');
-    }
+// ── Upload image to Supabase Storage ─────────────────────────
+const MAX_SIZE_BYTES = 500 * 1024; // 500 KB
 
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-    const filePath = `testimonial-images/${fileName}`;
+export async function uploadImage(file: File): Promise<string | null> {
+  if (file.size > MAX_SIZE_BYTES) {
+    throw new Error("Image must be smaller than 500 KB.");
+  }
 
-    {/* data */}
-    const { error } = await supabase.storage
-      .from('testimonials')
-      .upload(filePath, file);
+  const ext = file.name.split(".").pop();
+  const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const filePath = `testimonial-images/${fileName}`;
 
-    if (error) {
-      console.error('Error uploading image:', error);
-      return null;
-    }
+  const { error } = await supabase.storage
+    .from("testimonials")
+    .upload(filePath, file);
 
-    // Get public URL
-    const { data: urlData } = supabase.storage
-      .from('testimonials')
-      .getPublicUrl(filePath);
-
-    return urlData.publicUrl;
-  } catch (error) {
-    console.error('Error in uploadImage:', error);
+  if (error) {
+    console.error("[Testimonials] Upload error:", error.message);
     return null;
   }
-};
 
-// Submit testimonial to Supabase
-export const submitTestimonial = async (
+  const { data } = supabase.storage
+    .from("testimonials")
+    .getPublicUrl(filePath);
+
+  return data.publicUrl;
+}
+
+// ── Submit a testimonial ──────────────────────────────────────
+export async function submitTestimonial(
   formData: TestimonialFormData
-): Promise<{ success: boolean; error?: string }> => {
+): Promise<{ success: boolean; error?: string }> {
   try {
     let imageUrl: string | null = null;
 
-    // Handle image upload or URL
     if (formData.image) {
-      if (typeof formData.image === 'string') {
-        // It's a URL
+      if (typeof formData.image === "string") {
         imageUrl = formData.image;
       } else {
-        // It's a File object
         imageUrl = await uploadImage(formData.image);
         if (!imageUrl) {
-          return { success: false, error: 'Failed to upload image' };
+          return { success: false, error: "Image upload failed. Please try again." };
         }
       }
     }
 
-    // Insert into database
-    const { error } = await supabase.from('testimonials').insert([
+    const { error } = await supabase.from("testimonials").insert([
       {
-        name: formData.name,
+        name: formData.name.trim(),
         role: formData.role,
-        message: formData.message,
+        message: formData.message.trim(),
         profile_url: imageUrl,
       },
     ]);
 
     if (error) {
-      console.error('Error inserting testimonial:', error);
+      console.error("[Testimonials] Insert error:", error.message);
       return { success: false, error: error.message };
     }
 
     return { success: true };
-  } catch (error: any) {
-    console.error('Error in submitTestimonial:', error);
-    return { success: false, error: error.message || 'Unknown error occurred' };
+  } catch (err: any) {
+    console.error("[Testimonials] Unexpected error:", err);
+    return { success: false, error: err.message ?? "Something went wrong." };
   }
-};
-
-// Delete testimonial from Supabase (for admin use)
-export const deleteTestimonial = async (id: string): Promise<boolean> => {
-  try {
-    const { error } = await supabase
-      .from('testimonials')
-      .delete()
-      .eq('id', id);
-
-    if (error) {
-      console.error('Error deleting testimonial:', error);
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    console.error('Error in deleteTestimonial:', error);
-    return false;
-  }
-};
+}

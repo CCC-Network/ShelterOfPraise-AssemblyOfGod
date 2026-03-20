@@ -1,69 +1,96 @@
 // src/utils/visit.sendus.form.ts
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "../lib/supabaseClient";
 
-// Use Vite environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseKey = import.meta.env.VITE_SUPABASE_KEY;
-const supabase = createClient(supabaseUrl, supabaseKey);
+export interface VisitFormResult {
+  success: boolean;
+  error?: string;
+}
 
+/**
+ * submitVisitForm
+ * Call this from your React onSubmit handler.
+ * Returns { success: true } or { success: false, error: "reason" }
+ */
+export async function submitVisitForm(
+  subject: string,
+  name: string,
+  email: string,
+  message: string
+): Promise<VisitFormResult> {
+  if (!subject.trim() || !name.trim() || !email.trim() || !message.trim()) {
+    return { success: false, error: "Please fill in all fields." };
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email.trim())) {
+    return { success: false, error: "Please enter a valid email address." };
+  }
+
+  try {
+    const { error } = await supabase.from("visits").insert([
+      {
+        subject: subject.trim(),
+        name: name.trim(),
+        email: email.trim(),
+        message: message.trim(),
+      },
+    ]);
+
+    if (error) {
+      console.error("[VisitForm] Supabase error:", error.message, error.code);
+      return { success: false, error: "Failed to send your message. Please try again." };
+    }
+
+    return { success: true };
+  } catch (err) {
+    console.error("[VisitForm] Network error:", err);
+    return { success: false, error: "Network error. Please check your connection." };
+  }
+}
+
+/**
+ * initVisitFormHandler
+ * Legacy DOM-based handler — kept for backwards compatibility.
+ * Prefer using submitVisitForm() directly inside React components.
+ */
 export function initVisitFormHandler() {
-  const form = document.getElementById("triggerFormVisitForm") as HTMLFormElement | null;
-  const subjectInput = document.querySelector(".triggerSubject") as HTMLInputElement | null;
-  const nameInput = document.querySelector(".triggerName") as HTMLInputElement | null;
-  const emailInput = document.querySelector(".triggerEmail") as HTMLInputElement | null;
-  const messageInput = document.querySelector(".triggerMessage") as HTMLTextAreaElement | null;
-  const submitButton = document.getElementById("triggerSubmitForm") as HTMLButtonElement | null;
+  const form         = document.getElementById("triggerFormVisitForm") as HTMLFormElement | null;
+  const subjectInput = document.querySelector(".triggerSubject")       as HTMLInputElement | null;
+  const nameInput    = document.querySelector(".triggerName")          as HTMLInputElement | null;
+  const emailInput   = document.querySelector(".triggerEmail")         as HTMLInputElement | null;
+  const messageInput = document.querySelector(".triggerMessage")       as HTMLTextAreaElement | null;
+  const submitButton = document.getElementById("triggerSubmitForm")    as HTMLButtonElement | null;
 
   if (!form || !subjectInput || !nameInput || !emailInput || !messageInput || !submitButton) {
-    console.warn("Visit form elements not found.");
+    console.warn("[VisitForm] DOM elements not found.");
     return;
   }
 
-  console.log("Visit form initialized");
-
   form.addEventListener("submit", async (e) => {
-    e.preventDefault(); // Prevent page reload
+    e.preventDefault();
     submitButton.disabled = true;
+    submitButton.textContent = "Sending…";
 
-    const subject = subjectInput.value.trim();
-    const name = nameInput.value.trim();
-    const email = emailInput.value.trim();
-    const message = messageInput.value.trim();
+    const result = await submitVisitForm(
+      subjectInput.value,
+      nameInput.value,
+      emailInput.value,
+      messageInput.value
+    );
 
-    if (!subject || !name || !email || !message) {
-      alert("Please fill in all fields.");
+    if (!result.success) {
+      alert(result.error ?? "Something went wrong.");
       submitButton.disabled = false;
+      submitButton.textContent = "Send Message";
       return;
     }
 
-    try {
-      // Save to Supabase
-      const { data, error } = await supabase
-        .from("visits")
-        .insert([{ subject, name, email, message }]);
+    submitButton.textContent = "✓ Message Sent!";
+    form.reset();
 
-      if (error) {
-        console.error("Supabase insert error:", error.message);
-        alert("❌ Failed to send message. Try again.");
-        return;
-      }
-
-      console.log("Supabase insert success:", data);
-
-      // Update button text to "Message Sent" briefly
-      submitButton.textContent = "Message Sent";
-
-      // Reset form after a short delay
-      setTimeout(() => {
-        form.reset();
-        submitButton.disabled = false;
-        submitButton.textContent = "Send Message";
-      }, 2000); // 2 seconds
-
-    } catch (err) {
-      console.error(err);
-      alert("❌ Network error. Please try again later.");
+    setTimeout(() => {
       submitButton.disabled = false;
-    }
+      submitButton.textContent = "Send Message";
+    }, 2500);
   });
 }

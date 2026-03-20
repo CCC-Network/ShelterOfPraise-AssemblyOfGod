@@ -1,8 +1,13 @@
+@import "./index.css";
 #root {
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+}
+
+#mobileTextSize {
+  font-size: 30px;
 }
 
 .logo {
@@ -48,4 +53,68 @@
 }
 #play-button-overlay-g {
   background: #0000008c !important;
+}
+
+/*News Letter*/
+
+/* ============================================================
+   Newsletter Signup — paste into App.css
+   Used by: src/components/NewsletterSignup.tsx
+   ============================================================ */
+
+/* Input field inside the newsletter form */
+#email-newsletter {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db; /* gray-300 */
+  color: var(--white-color-secondary);             /* gray-900 */
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+#email-newsletter:focus {
+  border-color: #3b82f6;     /* blue-500 */
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+#email-newsletter:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Subscribe button */
+#subscribe-button {
+  width: 100%;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#subscribe-button:hover:not(:disabled) {
+  transform: scale(1.02);
+}
+
+#subscribe-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Status messages */
+.newsletter-success {
+  color: #4ade80;   /* green-400 */
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.newsletter-duplicate {
+  color: #facc15;   /* yellow-400 */
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+.newsletter-error {
+  color: #f87171;   /* red-400 */
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
 }
