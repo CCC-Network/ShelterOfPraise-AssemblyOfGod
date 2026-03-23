@@ -3,6 +3,15 @@
 
 > *A spirit-filled online space for worship, discipleship, and community.*
 
+**visit site:**
+> [shelterofpraise.org](https://shelterofpraise.org)
+
+> [shelterofpraise-assemblyofgod.onrender.com](https://shelterofpraise-assemblyofgod.onrender.com)
+
+> [shelter-of-praise-assembly-of-god.vercel.app](https://shelter-of-praise-assembly-of-god.vercel.app/)
+
+
+
 ---
 
 ![Website](https://img.shields.io/badge/Live%20Site-shelterofpraise.org-blue?style=flat-square&logo=google-chrome)
