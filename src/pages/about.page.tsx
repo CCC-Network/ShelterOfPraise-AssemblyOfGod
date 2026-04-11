@@ -1,5 +1,5 @@
 // src/pages/about.page.tsx
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react"; // useCallback
 import { Users, BookOpen, BarChart3, Grid3X3, List, ChevronRight } from "lucide-react";
 import * as d3 from "d3";
 
@@ -37,7 +37,7 @@ function OrgChart() {
     treeLayout(root);
 
     // Links
-    g.selectAll<SVGPathElement, d3.HierarchyPointLink<OrgNode>>(".org-link")
+    {/*g.selectAll<SVGPathElement, d3.HierarchyPointLink<OrgNode>>(".org-link")
       .data(root.links())
       .join("path")
       .attr("class", "org-link")
@@ -47,7 +47,19 @@ function OrgChart() {
           .linkHorizontal<d3.HierarchyPointLink<OrgNode>, d3.HierarchyPointNode<OrgNode>>()
           .x((d) => d.y)
           .y((d) => d.x)
-      );
+      );*/}
+      
+      g.selectAll<SVGPathElement, d3.HierarchyPointLink<OrgNode>>(".org-link")
+  .data(root.links() as d3.HierarchyPointLink<OrgNode>[])
+  .join("path")
+  .attr("class", "org-link")
+  .attr(
+    "d",
+    d3
+      .linkHorizontal<d3.HierarchyPointLink<OrgNode>, d3.HierarchyPointNode<OrgNode>>()
+      .x((d) => d.y)
+      .y((d) => d.x)
+  );
 
     // Node groups
     const node = g
