@@ -1,7 +1,7 @@
 // src/pages/about/components/CongregationProfileView.tsx
 import { useEffect } from "react";
 import { X, MapPin, BookOpen, GraduationCap, Calendar, Star } from "lucide-react";
-import type { MemberProfile } from "../about.data";
+import type { MemberProfile } from "../../../app/database/data/about-us/about.data";
 
 interface Props {
   member: MemberProfile;

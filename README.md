@@ -1,4 +1,4 @@
-# 🕊️ shelterofpraise.org  
+# 🕊️ shelterofpraise-ag.org  
 **Shelter of Praise | Assembly of God** — Connecting Faith, Family, and Fellowship  
 
 > *A spirit-filled online space for worship, discipleship, and community.*
@@ -19,6 +19,8 @@
 ![License](https://img.shields.io/github/license/yourusername/shelterofpraise.org?style=flat-square)
 ![Issues](https://img.shields.io/github/issues/yourusername/shelterofpraise.org?style=flat-square)
 ![Stars](https://img.shields.io/github/stars/yourusername/shelterofpraise.org?style=flat-square)
+
+<img src="https://github.com/conquerorscoheirs-ag/ShelterOfPraise-AssemblyOfGod-Database-Hosting/blob/main/Public/photos/assets/banners/_cover-about_X.png?raw=true"/>
 
 ### 🌐 About the Project  
 

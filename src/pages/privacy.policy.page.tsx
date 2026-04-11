@@ -15,7 +15,7 @@ const PrivacyPolicyPage = () => (
     <span className="font-medium"> jednazlonestamp9@gmail.com</span>, phone:
     <span className="font-medium"> 912 345 6789</span>, on the collection, use, and disclosure
     of your information that we collect when you use our website
-    (<span className="text-blue-600 underline">https://ccc.shelterofpraise-ag.org</span>).
+    (<span className="text-blue-600 underline"><a href="shelterofpraise-assemblyofgod.onrender.com">shelterofpraise-ag.org</a></span>).
     By accessing or using the Service, you consent to the practices described in this Privacy Policy.
   </p>
 
